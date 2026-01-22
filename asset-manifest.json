@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/expedium/static/css/main.751b147f.css",
-    "main.js": "/expedium/static/js/main.252ce373.js",
+    "main.css": "/expedium/static/css/main.ab83e920.css",
+    "main.js": "/expedium/static/js/main.04fd25ab.js",
     "static/js/453.0821c975.chunk.js": "/expedium/static/js/453.0821c975.chunk.js",
     "index.html": "/expedium/index.html",
-    "main.751b147f.css.map": "/expedium/static/css/main.751b147f.css.map",
-    "main.252ce373.js.map": "/expedium/static/js/main.252ce373.js.map",
+    "main.ab83e920.css.map": "/expedium/static/css/main.ab83e920.css.map",
+    "main.04fd25ab.js.map": "/expedium/static/js/main.04fd25ab.js.map",
     "453.0821c975.chunk.js.map": "/expedium/static/js/453.0821c975.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.751b147f.css",
-    "static/js/main.252ce373.js"
+    "static/css/main.ab83e920.css",
+    "static/js/main.04fd25ab.js"
   ]
 }

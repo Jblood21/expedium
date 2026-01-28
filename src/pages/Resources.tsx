@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BookOpen, Play, FileText, Download, ExternalLink, Search,
   TrendingUp, Users, DollarSign, Target, Lightbulb, CheckCircle,
-  ChevronRight, Star, Clock, Filter, Award
+  ChevronRight, Star, Clock, Filter, Award, Building2, Sparkles,
+  RefreshCw, Plus, Minus, ArrowUpRight, ArrowDownRight, Equal,
+  Loader, Trash2, Globe
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface Resource {
   id: string;
@@ -25,10 +28,247 @@ interface Guide {
   icon: React.ElementType;
 }
 
+interface Competitor {
+  id: string;
+  name: string;
+  description: string;
+  website: string;
+  industry: string;
+  products: { name: string; price: string; description: string }[];
+  strengths: string[];
+  weaknesses: string[];
+  comparison: {
+    pricing: 'higher' | 'lower' | 'similar';
+    marketShare: 'larger' | 'smaller' | 'similar';
+    features: 'more' | 'fewer' | 'similar';
+  };
+  threatLevel: 'high' | 'medium' | 'low';
+}
+
 const Resources: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('guides');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [competitors, setCompetitors] = useState<Competitor[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingCount, setGeneratingCount] = useState(0);
+  const [businessData, setBusinessData] = useState<any>(null);
+
+  // Load business plan data and saved competitors
+  useEffect(() => {
+    if (!user) return;
+    const savedAnswers = localStorage.getItem(`expedium_answers_${user.id}`);
+    const savedCompetitors = localStorage.getItem(`expedium_competitors_${user.id}`);
+
+    if (savedAnswers) {
+      setBusinessData(JSON.parse(savedAnswers));
+    }
+    if (savedCompetitors) {
+      setCompetitors(JSON.parse(savedCompetitors));
+    }
+  }, [user]);
+
+  // Save competitors when they change
+  useEffect(() => {
+    if (!user || competitors.length === 0) return;
+    localStorage.setItem(`expedium_competitors_${user.id}`, JSON.stringify(competitors));
+  }, [competitors, user]);
+
+  // AI competitor generation based on business data
+  const generateCompetitor = (): Competitor => {
+    const industries = businessData?.industry || ['General'];
+    const industry = Array.isArray(industries) ? industries[0] : industries;
+    const revenueModels = businessData?.revenue_model || [];
+    const stage = businessData?.business_stage || 'Startup';
+
+    // Competitor name templates based on industry
+    const nameTemplates: { [key: string]: string[] } = {
+      'Technology': ['TechFlow', 'ByteCore', 'CloudNine Solutions', 'DataPulse', 'NexGen Systems', 'CodeCraft', 'DigiWave', 'SyncTech', 'InnovateTech', 'PrismData'],
+      'Retail': ['ShopSmart', 'ValueMart', 'TrendSetters', 'PrimeGoods', 'UrbanStyle', 'QuickShop', 'StyleHub', 'MegaSave', 'FreshChoice', 'DealZone'],
+      'Healthcare': ['HealthFirst', 'MediCare Plus', 'VitalWell', 'CareConnect', 'HealthBridge', 'WellnessHub', 'MedTrust', 'LifeCare', 'PulseMed', 'HealRight'],
+      'Food & Beverage': ['FreshBite', 'TastyHub', 'FlavorKing', 'GourmetGo', 'QuickEats', 'FoodFusion', 'TasteMakers', 'SavorMore', 'ChefChoice', 'BiteBox'],
+      'Professional Services': ['ProConsult', 'ExpertEdge', 'StrategicMinds', 'EliteAdvisors', 'PrimePartners', 'InsightPro', 'TopTier Solutions', 'CoreStrategy', 'ApexAdvisory', 'TrustBridge'],
+      'E-commerce': ['ShipQuick', 'BuyDirect', 'MarketPlace Pro', 'ClickCart', 'OnlineHaven', 'eShopNow', 'CartGenius', 'WebMart', 'DigitalBazaar', 'SwiftShop'],
+      'Finance': ['WealthWise', 'MoneyMasters', 'CapitalCore', 'FinanceFirst', 'InvestRight', 'SecureFunds', 'PrimeCapital', 'TrustFinance', 'GrowWealth', 'SmartMoney'],
+      'Education': ['LearnPro', 'EduSmart', 'KnowledgeHub', 'SkillUp Academy', 'MindGrow', 'StudySphere', 'ClassMaster', 'BrightPath', 'EduExcel', 'LearnQuest'],
+      'Manufacturing': ['MakeTech', 'BuildPro', 'IndustrialEdge', 'PrecisionWorks', 'FactoryPlus', 'CraftCore', 'MetalMasters', 'ProducePro', 'AssemblyKing', 'QualityMake'],
+      'Real Estate': ['PropertyPro', 'HomeFirst', 'RealtyMax', 'EstateEdge', 'PrimePlaces', 'LandMark', 'DreamHomes', 'SpaceFind', 'UrbanRealty', 'HomeTrust'],
+      'Entertainment': ['FunZone', 'PlayMax', 'ShowTime', 'EventPro', 'JoyHub', 'ThrillWorks', 'StarLight', 'EntertainAll', 'FestiveFun', 'GalaxyPlay'],
+      'default': ['GlobalCorp', 'MarketLeaders', 'IndustryPro', 'PremierChoice', 'EliteBusiness', 'TopNotch Co', 'NextLevel', 'ProEdge', 'CoreBusiness', 'PrimeGroup']
+    };
+
+    const industryNames = nameTemplates[industry] || nameTemplates['default'];
+    const usedNames = competitors.map(c => c.name);
+    const availableNames = industryNames.filter(n => !usedNames.includes(n));
+    const compName = availableNames.length > 0
+      ? availableNames[Math.floor(Math.random() * availableNames.length)]
+      : `${industry} Competitor ${competitors.length + 1}`;
+
+    // Generate products based on revenue model
+    const productTemplates: { [key: string]: { name: string; price: string; description: string }[] } = {
+      'Product Sales': [
+        { name: 'Standard Package', price: '$49-199', description: 'Entry-level product offering' },
+        { name: 'Premium Package', price: '$299-599', description: 'Advanced features and support' },
+        { name: 'Enterprise Solution', price: '$999+', description: 'Full-featured for large organizations' }
+      ],
+      'Service Fees': [
+        { name: 'Basic Service', price: '$75-150/hr', description: 'Standard consulting/service rate' },
+        { name: 'Project Package', price: '$2,000-10,000', description: 'Fixed-price project work' },
+        { name: 'Retainer', price: '$1,500-5,000/mo', description: 'Ongoing service agreement' }
+      ],
+      'Subscription Model': [
+        { name: 'Starter Plan', price: '$9-29/mo', description: 'Basic features for individuals' },
+        { name: 'Professional', price: '$49-99/mo', description: 'Full features for small teams' },
+        { name: 'Enterprise', price: '$199-499/mo', description: 'Custom solutions with support' }
+      ],
+      'Consulting': [
+        { name: 'Strategy Session', price: '$250-500', description: 'One-time consulting session' },
+        { name: 'Advisory Package', price: '$2,500-7,500', description: 'Ongoing strategic guidance' },
+        { name: 'Full Engagement', price: '$10,000-50,000', description: 'Comprehensive consulting project' }
+      ],
+      'default': [
+        { name: 'Core Offering', price: '$99-299', description: 'Main product or service' },
+        { name: 'Add-on Services', price: '$49-149', description: 'Supplementary offerings' },
+        { name: 'Premium Tier', price: '$499+', description: 'High-value package' }
+      ]
+    };
+
+    const revenueModel = revenueModels[0] || 'default';
+    const products = productTemplates[revenueModel] || productTemplates['default'];
+
+    // Strengths and weaknesses pools
+    const strengthsPool = [
+      'Established brand recognition',
+      'Large customer base',
+      'Strong online presence',
+      'Competitive pricing',
+      'Wide product range',
+      'Excellent customer service',
+      'Strong partnerships',
+      'Innovative technology',
+      'Efficient operations',
+      'Quality reputation',
+      'Strong marketing',
+      'Financial stability',
+      'Experienced team',
+      'Loyal customers',
+      'Good reviews'
+    ];
+
+    const weaknessesPool = [
+      'Slow to innovate',
+      'Higher prices',
+      'Limited customization',
+      'Poor mobile experience',
+      'Outdated technology',
+      'Limited support hours',
+      'Complex onboarding',
+      'Long contracts required',
+      'Limited integrations',
+      'Slow response times',
+      'Generic solutions',
+      'Hidden fees',
+      'Rigid policies',
+      'Limited scalability'
+    ];
+
+    const getRandomItems = (arr: string[], count: number): string[] => {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    const pricing: 'higher' | 'lower' | 'similar' = ['higher', 'lower', 'similar'][Math.floor(Math.random() * 3)] as any;
+    const marketShare: 'larger' | 'smaller' | 'similar' = stage === 'Idea Stage' || stage === 'Startup (0-1 years)'
+      ? ['larger', 'larger', 'similar'][Math.floor(Math.random() * 3)] as any
+      : ['larger', 'smaller', 'similar'][Math.floor(Math.random() * 3)] as any;
+    const features: 'more' | 'fewer' | 'similar' = ['more', 'fewer', 'similar'][Math.floor(Math.random() * 3)] as any;
+
+    const threatLevel: 'high' | 'medium' | 'low' =
+      marketShare === 'larger' && pricing === 'lower' ? 'high' :
+      marketShare === 'smaller' && pricing === 'higher' ? 'low' : 'medium';
+
+    return {
+      id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: compName,
+      description: `A ${marketShare === 'larger' ? 'major' : marketShare === 'smaller' ? 'emerging' : 'comparable'} player in the ${industry} space offering ${revenueModel.toLowerCase()} solutions.`,
+      website: `www.${compName.toLowerCase().replace(/\s+/g, '')}.com`,
+      industry: industry,
+      products: products.map(p => ({
+        ...p,
+        price: pricing === 'higher' ? p.price.replace(/\$(\d+)/g, (_, n) => `$${Math.round(parseInt(n) * 1.2)}`)
+             : pricing === 'lower' ? p.price.replace(/\$(\d+)/g, (_, n) => `$${Math.round(parseInt(n) * 0.8)}`)
+             : p.price
+      })),
+      strengths: getRandomItems(strengthsPool, 3),
+      weaknesses: getRandomItems(weaknessesPool, 2),
+      comparison: { pricing, marketShare, features },
+      threatLevel
+    };
+  };
+
+  const handleGenerateCompetitors = async (count: number) => {
+    if (!businessData) {
+      alert('Please complete your Business Plan first to generate relevant competitors.');
+      return;
+    }
+    if (competitors.length + count > 10) {
+      alert(`You can only have up to 10 competitors. You have ${competitors.length} currently.`);
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratingCount(count);
+
+    // Simulate AI generation with delays
+    for (let i = 0; i < count; i++) {
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+      const newCompetitor = generateCompetitor();
+      setCompetitors(prev => [...prev, newCompetitor]);
+      setGeneratingCount(prev => prev - 1);
+    }
+
+    setIsGenerating(false);
+    setGeneratingCount(0);
+  };
+
+  const removeCompetitor = (id: string) => {
+    setCompetitors(prev => prev.filter(c => c.id !== id));
+    if (user) {
+      const updated = competitors.filter(c => c.id !== id);
+      localStorage.setItem(`expedium_competitors_${user.id}`, JSON.stringify(updated));
+    }
+  };
+
+  const clearAllCompetitors = () => {
+    setCompetitors([]);
+    if (user) {
+      localStorage.removeItem(`expedium_competitors_${user.id}`);
+    }
+  };
+
+  const regenerateCompetitor = async (id: string) => {
+    setIsGenerating(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const newCompetitor = generateCompetitor();
+    newCompetitor.id = id; // Keep same ID
+    setCompetitors(prev => prev.map(c => c.id === id ? newCompetitor : c));
+    setIsGenerating(false);
+  };
+
+  const getComparisonIcon = (type: string, value: string) => {
+    if (type === 'pricing') {
+      return value === 'higher' ? <ArrowUpRight size={14} className="comp-icon higher" /> :
+             value === 'lower' ? <ArrowDownRight size={14} className="comp-icon lower" /> :
+             <Equal size={14} className="comp-icon similar" />;
+    }
+    if (type === 'marketShare' || type === 'features') {
+      return value === 'larger' || value === 'more' ? <ArrowUpRight size={14} className="comp-icon higher" /> :
+             value === 'smaller' || value === 'fewer' ? <ArrowDownRight size={14} className="comp-icon lower" /> :
+             <Equal size={14} className="comp-icon similar" />;
+    }
+    return null;
+  };
 
   const categories = [
     { id: 'all', label: 'All Resources' },
@@ -264,6 +504,12 @@ const Resources: React.FC = () => {
           onClick={() => setActiveTab('best-practices')}
         >
           <Star size={18} /> Best Practices
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'competitors' ? 'active' : ''}`}
+          onClick={() => setActiveTab('competitors')}
+        >
+          <Building2 size={18} /> Competitor Analysis
         </button>
       </div>
 
@@ -502,6 +748,220 @@ const Resources: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Competitor Analysis Tab */}
+      {activeTab === 'competitors' && (
+        <div className="competitors-section">
+          <div className="competitors-header">
+            <div className="competitors-intro">
+              <h3><Building2 size={24} /> AI-Powered Competitor Analysis</h3>
+              <p>
+                Generate up to 10 competitors based on your business profile. AI analyzes your industry,
+                revenue model, and business stage to identify relevant competitors with pricing and feature comparisons.
+              </p>
+            </div>
+
+            {!businessData ? (
+              <div className="no-business-plan">
+                <Lightbulb size={48} />
+                <h4>Complete Your Business Plan First</h4>
+                <p>To generate relevant competitors, we need to understand your business. Complete your Business Plan survey to unlock this feature.</p>
+                <a href="/business-plan" className="btn-primary">
+                  Create Business Plan <ChevronRight size={16} />
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className="generate-controls">
+                  <div className="competitor-count">
+                    <span className="count-label">{competitors.length}/10 Competitors</span>
+                    <div className="count-bar">
+                      <div className="count-fill" style={{ width: `${(competitors.length / 10) * 100}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="generate-buttons">
+                    <button
+                      className="generate-btn"
+                      onClick={() => handleGenerateCompetitors(1)}
+                      disabled={isGenerating || competitors.length >= 10}
+                    >
+                      {isGenerating ? <Loader size={16} className="spinning" /> : <Plus size={16} />}
+                      Add 1 Competitor
+                    </button>
+                    <button
+                      className="generate-btn primary"
+                      onClick={() => handleGenerateCompetitors(Math.min(3, 10 - competitors.length))}
+                      disabled={isGenerating || competitors.length >= 10}
+                    >
+                      {isGenerating ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                      Generate 3
+                    </button>
+                    {competitors.length > 0 && (
+                      <button
+                        className="generate-btn danger"
+                        onClick={clearAllCompetitors}
+                        disabled={isGenerating}
+                      >
+                        <Trash2 size={16} /> Clear All
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {isGenerating && generatingCount > 0 && (
+                  <div className="generating-status">
+                    <Loader size={20} className="spinning" />
+                    <span>Analyzing market and generating {generatingCount} competitor{generatingCount > 1 ? 's' : ''}...</span>
+                  </div>
+                )}
+
+                {competitors.length === 0 && !isGenerating && (
+                  <div className="no-competitors">
+                    <Building2 size={48} />
+                    <h4>No Competitors Yet</h4>
+                    <p>Click "Generate" to have AI analyze your market and create competitor profiles based on your business plan.</p>
+                  </div>
+                )}
+
+                <div className="competitors-grid">
+                  {competitors.map((competitor) => (
+                    <div key={competitor.id} className={`competitor-card threat-${competitor.threatLevel}`}>
+                      <div className="competitor-header">
+                        <div className="competitor-name">
+                          <Building2 size={20} />
+                          <h4>{competitor.name}</h4>
+                        </div>
+                        <div className="competitor-actions">
+                          <button
+                            className="comp-action-btn"
+                            onClick={() => regenerateCompetitor(competitor.id)}
+                            title="Regenerate"
+                            disabled={isGenerating}
+                          >
+                            <RefreshCw size={14} />
+                          </button>
+                          <button
+                            className="comp-action-btn delete"
+                            onClick={() => removeCompetitor(competitor.id)}
+                            title="Remove"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <p className="competitor-description">{competitor.description}</p>
+
+                      <div className="competitor-website">
+                        <Globe size={14} />
+                        <span>{competitor.website}</span>
+                      </div>
+
+                      <div className="threat-badge">
+                        Threat Level: <span className={competitor.threatLevel}>{competitor.threatLevel.charAt(0).toUpperCase() + competitor.threatLevel.slice(1)}</span>
+                      </div>
+
+                      <div className="competitor-products">
+                        <h5>Products & Pricing</h5>
+                        {competitor.products.map((product, idx) => (
+                          <div key={idx} className="product-item">
+                            <div className="product-info">
+                              <span className="product-name">{product.name}</span>
+                              <span className="product-desc">{product.description}</span>
+                            </div>
+                            <span className="product-price">{product.price}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="competitor-comparison">
+                        <h5>Comparison to Your Business</h5>
+                        <div className="comparison-grid">
+                          <div className="comparison-item">
+                            <span className="comp-label">Pricing</span>
+                            <span className="comp-value">
+                              {getComparisonIcon('pricing', competitor.comparison.pricing)}
+                              {competitor.comparison.pricing.charAt(0).toUpperCase() + competitor.comparison.pricing.slice(1)}
+                            </span>
+                          </div>
+                          <div className="comparison-item">
+                            <span className="comp-label">Market Share</span>
+                            <span className="comp-value">
+                              {getComparisonIcon('marketShare', competitor.comparison.marketShare)}
+                              {competitor.comparison.marketShare.charAt(0).toUpperCase() + competitor.comparison.marketShare.slice(1)}
+                            </span>
+                          </div>
+                          <div className="comparison-item">
+                            <span className="comp-label">Features</span>
+                            <span className="comp-value">
+                              {getComparisonIcon('features', competitor.comparison.features)}
+                              {competitor.comparison.features.charAt(0).toUpperCase() + competitor.comparison.features.slice(1)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="competitor-analysis">
+                        <div className="analysis-section">
+                          <h5><ArrowUpRight size={14} /> Their Strengths</h5>
+                          <ul>
+                            {competitor.strengths.map((s, idx) => (
+                              <li key={idx}>{s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="analysis-section weaknesses">
+                          <h5><ArrowDownRight size={14} /> Their Weaknesses</h5>
+                          <ul>
+                            {competitor.weaknesses.map((w, idx) => (
+                              <li key={idx}>{w}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {competitors.length > 0 && (
+                  <div className="competitors-summary">
+                    <h3><Target size={20} /> Competitive Landscape Summary</h3>
+                    <div className="summary-stats">
+                      <div className="summary-stat">
+                        <span className="stat-value">{competitors.filter(c => c.threatLevel === 'high').length}</span>
+                        <span className="stat-label">High Threat</span>
+                      </div>
+                      <div className="summary-stat">
+                        <span className="stat-value">{competitors.filter(c => c.threatLevel === 'medium').length}</span>
+                        <span className="stat-label">Medium Threat</span>
+                      </div>
+                      <div className="summary-stat">
+                        <span className="stat-value">{competitors.filter(c => c.threatLevel === 'low').length}</span>
+                        <span className="stat-label">Low Threat</span>
+                      </div>
+                      <div className="summary-stat">
+                        <span className="stat-value">{competitors.filter(c => c.comparison.pricing === 'lower').length}</span>
+                        <span className="stat-label">Lower Priced</span>
+                      </div>
+                    </div>
+                    <div className="summary-insight">
+                      <Lightbulb size={18} />
+                      <p>
+                        {competitors.filter(c => c.threatLevel === 'high').length > 2
+                          ? 'You have significant competition. Focus on differentiating through superior customer service, unique features, or niche targeting.'
+                          : competitors.filter(c => c.comparison.pricing === 'lower').length > competitors.length / 2
+                          ? 'Many competitors are pricing lower. Consider emphasizing value-added services or premium positioning.'
+                          : 'Your competitive landscape is manageable. Focus on building brand recognition and customer loyalty.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

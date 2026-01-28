@@ -1319,6 +1319,101 @@ body.dark-mode .redo-confirm-modal h2 {
 .benchmark-item .label { color: var(--gray); }
 .benchmark-item .value { font-weight: 600; }
 
+/* Competitor Analysis Section */
+.competitors-section { padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.competitors-intro { margin-bottom: 1.5rem; }
+.competitors-intro h3 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 1.25rem; }
+.competitors-intro h3 svg { color: var(--primary); }
+.competitors-intro p { color: var(--gray); line-height: 1.6; }
+
+.no-business-plan { text-align: center; padding: 3rem 2rem; background: var(--light); border-radius: 12px; }
+.no-business-plan svg { color: var(--gray-light); margin-bottom: 1rem; }
+.no-business-plan h4 { margin-bottom: 0.5rem; }
+.no-business-plan p { color: var(--gray); margin-bottom: 1.5rem; }
+
+.generate-controls { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--light); border-radius: 10px; flex-wrap: wrap; }
+.competitor-count { flex: 1; min-width: 150px; }
+.count-label { font-size: 0.9rem; font-weight: 500; color: var(--dark); margin-bottom: 0.5rem; display: block; }
+.count-bar { height: 8px; background: rgba(99, 102, 241, 0.2); border-radius: 4px; overflow: hidden; }
+.count-fill { height: 100%; background: var(--gradient); border-radius: 4px; transition: width 0.3s; }
+
+.generate-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.generate-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--gray-light); background: var(--white); color: var(--gray); }
+.generate-btn:hover { border-color: var(--primary); color: var(--primary); }
+.generate-btn.primary { background: var(--gradient); border-color: transparent; color: white; }
+.generate-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
+.generate-btn.danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); }
+.generate-btn.danger:hover { background: var(--danger); color: white; }
+.generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.generating-status { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px; margin-bottom: 1.5rem; color: var(--primary); font-weight: 500; }
+
+.no-competitors { text-align: center; padding: 3rem 2rem; background: var(--light); border-radius: 12px; }
+.no-competitors svg { color: var(--gray-light); margin-bottom: 1rem; }
+.no-competitors h4 { margin-bottom: 0.5rem; }
+.no-competitors p { color: var(--gray); }
+
+.competitors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.25rem; }
+.competitor-card { background: var(--white); border: 1px solid var(--light); border-radius: 12px; padding: 1.25rem; transition: box-shadow 0.2s; }
+.competitor-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.competitor-card.threat-high { border-left: 4px solid var(--danger); }
+.competitor-card.threat-medium { border-left: 4px solid var(--warning); }
+.competitor-card.threat-low { border-left: 4px solid var(--success); }
+
+.competitor-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+.competitor-name { display: flex; align-items: center; gap: 0.5rem; }
+.competitor-name svg { color: var(--primary); }
+.competitor-name h4 { font-size: 1.1rem; margin: 0; }
+.competitor-actions { display: flex; gap: 0.25rem; }
+.comp-action-btn { padding: 0.35rem; background: var(--light); border: none; border-radius: 6px; color: var(--gray); cursor: pointer; transition: all 0.2s; }
+.comp-action-btn:hover { background: var(--primary-light); color: var(--primary); }
+.comp-action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+.competitor-description { font-size: 0.9rem; color: var(--gray); margin-bottom: 0.75rem; line-height: 1.5; }
+.competitor-website { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--primary); margin-bottom: 0.75rem; }
+
+.threat-badge { display: inline-block; font-size: 0.8rem; margin-bottom: 1rem; }
+.threat-badge span { padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 500; }
+.threat-badge span.high { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.threat-badge span.medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.threat-badge span.low { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+.competitor-products { margin-bottom: 1rem; }
+.competitor-products h5 { font-size: 0.85rem; color: var(--gray); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.product-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.5rem; background: var(--light); border-radius: 6px; margin-bottom: 0.5rem; }
+.product-info { flex: 1; }
+.product-name { display: block; font-weight: 500; font-size: 0.9rem; }
+.product-desc { font-size: 0.8rem; color: var(--gray); }
+.product-price { font-weight: 600; color: var(--primary); font-size: 0.9rem; white-space: nowrap; margin-left: 1rem; }
+
+.competitor-comparison { margin-bottom: 1rem; padding: 0.75rem; background: rgba(99, 102, 241, 0.05); border-radius: 8px; }
+.competitor-comparison h5 { font-size: 0.85rem; margin-bottom: 0.5rem; }
+.comparison-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.comparison-item { text-align: center; }
+.comp-label { display: block; font-size: 0.75rem; color: var(--gray); margin-bottom: 0.25rem; }
+.comp-value { display: flex; align-items: center; justify-content: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 500; }
+.comp-icon.higher { color: var(--danger); }
+.comp-icon.lower { color: var(--success); }
+.comp-icon.similar { color: var(--gray); }
+
+.competitor-analysis { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.analysis-section h5 { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: var(--gray); margin-bottom: 0.35rem; }
+.analysis-section ul { list-style: none; padding: 0; margin: 0; }
+.analysis-section li { font-size: 0.8rem; padding: 0.2rem 0; color: var(--dark); }
+.analysis-section li::before { content: '•'; color: var(--success); margin-right: 0.35rem; }
+.analysis-section.weaknesses li::before { color: var(--danger); }
+
+.competitors-summary { margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%); border-radius: 12px; }
+.competitors-summary h3 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.competitors-summary h3 svg { color: var(--primary); }
+.summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.summary-stat { text-align: center; padding: 1rem; background: var(--white); border-radius: 8px; }
+.summary-stat .stat-value { display: block; font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+.summary-stat .stat-label { font-size: 0.8rem; color: var(--gray); }
+.summary-insight { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem; background: var(--white); border-radius: 8px; }
+.summary-insight svg { color: var(--warning); flex-shrink: 0; margin-top: 0.15rem; }
+.summary-insight p { font-size: 0.9rem; color: var(--dark); line-height: 1.5; margin: 0; }
+
 /* Documents Page */
 .documents-page { max-width: 1100px; margin: 0 auto; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
@@ -2555,7 +2650,7 @@ body.dark-mode .search-input-box kbd { background: #334155; color: #94a3b8; }
 body.dark-mode .search-result:hover { background: #334155; }
 body.dark-mode .search-result { color: #e2e8f0; }
 body.dark-mode .dashboard-card, body.dark-mode .stat-card, body.dark-mode .guide-card, body.dark-mode .settings-content, body.dark-mode .modal-content, body.dark-mode .calculator-panel, body.dark-mode .customer-card, body.dark-mode .survey-section, body.dark-mode .swot-card, body.dark-mode .goal-card, body.dark-mode .campaign-card, body.dark-mode .template-card, body.dark-mode .invoice-card, body.dark-mode .proposal-card, body.dark-mode .contract-card, body.dark-mode .transaction-item, body.dark-mode .resource-item, body.dark-mode .post-item, body.dark-mode .competitor-card, body.dark-mode .budget-card, body.dark-mode .chart-card, body.dark-mode .breakdown-card, body.dark-mode .summary-card, body.dark-mode .calendar-section, body.dark-mode .milestone-content { background: #1e293b; }
-body.dark-mode .profile-completion-card, body.dark-mode .option-card, body.dark-mode .data-card, body.dark-mode .help-card, body.dark-mode .practice-card, body.dark-mode .benchmarks-section, body.dark-mode .featured-card, body.dark-mode .sidebar-section, body.dark-mode .search-bar, body.dark-mode .goal-progress-bar, body.dark-mode .goals-section, body.dark-mode .analytics-section { background: #1e293b; box-shadow: none; }
+body.dark-mode .profile-completion-card, body.dark-mode .option-card, body.dark-mode .data-card, body.dark-mode .help-card, body.dark-mode .practice-card, body.dark-mode .benchmarks-section, body.dark-mode .featured-card, body.dark-mode .sidebar-section, body.dark-mode .search-bar, body.dark-mode .goal-progress-bar, body.dark-mode .goals-section, body.dark-mode .analytics-section, body.dark-mode .competitors-section { background: #1e293b; box-shadow: none; }
 body.dark-mode .quick-action-btn, body.dark-mode .followup-item, body.dark-mode .upcoming-event-item, body.dark-mode .key-results, body.dark-mode .metric, body.dark-mode .platform-card, body.dark-mode .swot-quadrant, body.dark-mode .calendar-day.active { background: #334155; }
 body.dark-mode .quick-action-btn { color: #e2e8f0; }
 body.dark-mode .quick-action-btn:hover { background: rgba(99, 102, 241, 0.3); color: var(--primary-light); }
@@ -2823,6 +2918,35 @@ body.dark-mode .practice-source { color: var(--primary-light); }
 body.dark-mode .practice-card a { color: var(--primary-light); }
 body.dark-mode .benchmark-source { color: var(--primary-light); }
 body.dark-mode .benchmarks-intro a { color: var(--primary-light); }
+
+/* Dark mode competitor analysis */
+body.dark-mode .competitors-intro p { color: #94a3b8; }
+body.dark-mode .no-business-plan, body.dark-mode .no-competitors { background: #334155; }
+body.dark-mode .generate-controls { background: #334155; }
+body.dark-mode .count-label { color: #e2e8f0; }
+body.dark-mode .count-bar { background: rgba(99, 102, 241, 0.3); }
+body.dark-mode .generate-btn { background: #1e293b; border-color: #475569; color: #94a3b8; }
+body.dark-mode .generate-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+body.dark-mode .generate-btn.danger { background: rgba(239, 68, 68, 0.2); }
+body.dark-mode .generating-status { background: rgba(99, 102, 241, 0.2); }
+body.dark-mode .competitor-card { background: #1e293b; border-color: #334155; }
+body.dark-mode .competitor-name h4 { color: #e2e8f0; }
+body.dark-mode .competitor-description { color: #94a3b8; }
+body.dark-mode .comp-action-btn { background: #334155; color: #94a3b8; }
+body.dark-mode .comp-action-btn:hover { background: rgba(99, 102, 241, 0.2); }
+body.dark-mode .product-item { background: #334155; }
+body.dark-mode .product-name { color: #e2e8f0; }
+body.dark-mode .product-desc { color: #94a3b8; }
+body.dark-mode .competitor-comparison { background: rgba(99, 102, 241, 0.1); }
+body.dark-mode .competitor-comparison h5 { color: #e2e8f0; }
+body.dark-mode .comp-label { color: #94a3b8; }
+body.dark-mode .comp-value { color: #e2e8f0; }
+body.dark-mode .analysis-section h5 { color: #94a3b8; }
+body.dark-mode .analysis-section li { color: #e2e8f0; }
+body.dark-mode .competitors-summary { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); }
+body.dark-mode .summary-stat { background: #334155; }
+body.dark-mode .summary-insight { background: #334155; }
+body.dark-mode .summary-insight p { color: #e2e8f0; }
 body.dark-mode .resource-item:hover { background: rgba(99, 102, 241, 0.1); }
 body.dark-mode .guide-steps li { border-color: #334155; }
 

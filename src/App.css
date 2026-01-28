@@ -1007,6 +1007,31 @@ body {
 .plan-section p { color: var(--dark); line-height: 1.7; }
 .plan-section h4 { font-size: 0.95rem; color: var(--gray); margin-bottom: 0.25rem; font-weight: 600; }
 
+/* Section Header with Edit/Regenerate Controls */
+.section-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.section-header-row h2 { margin-bottom: 0; flex: 1; min-width: 200px; }
+.section-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.section-action-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.section-action-btn.edit { background: var(--light); color: var(--gray); border-color: var(--gray-light); }
+.section-action-btn.edit:hover { background: var(--primary); color: white; border-color: var(--primary); }
+.section-action-btn.regenerate { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); color: var(--primary); border-color: var(--primary-light); }
+.section-action-btn.regenerate:hover { background: var(--gradient); color: white; border-color: transparent; }
+.section-action-btn.regenerate:disabled { opacity: 0.7; cursor: not-allowed; }
+.section-action-btn.reset { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); padding: 0.4rem 0.5rem; }
+.section-action-btn.reset:hover { background: var(--danger); color: white; border-color: var(--danger); }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Section Edit Mode */
+.section-edit-mode { background: var(--light); border-radius: 10px; padding: 1rem; }
+.section-edit-textarea { width: 100%; padding: 1rem; border: 2px solid var(--gray-light); border-radius: 8px; font-size: 0.95rem; font-family: inherit; line-height: 1.6; resize: vertical; transition: border-color 0.2s; }
+.section-edit-textarea:focus { outline: none; border-color: var(--primary); }
+.section-edit-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem; }
+.section-edit-actions .btn-secondary { padding: 0.5rem 1rem; background: var(--white); border: 1px solid var(--gray-light); border-radius: 6px; color: var(--gray); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.section-edit-actions .btn-secondary:hover { border-color: var(--gray); color: var(--dark); }
+.section-edit-actions .btn-primary { display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem; background: var(--gradient); border: none; border-radius: 6px; color: white; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.section-edit-actions .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
+
 .plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .plan-item { padding: 1rem; background: var(--light); border-radius: 10px; }
 .plan-item h4 { font-size: 0.8rem; color: var(--gray); text-transform: uppercase; margin-bottom: 0.35rem; }
@@ -2893,6 +2918,15 @@ body.dark-mode .plan-actions-bar { background: #0f172a; }
 body.dark-mode .plan-section { border-color: #334155; }
 body.dark-mode .plan-section p { color: #e2e8f0; }
 body.dark-mode .plan-section h4 { color: #94a3b8; }
+body.dark-mode .section-action-btn.edit { background: #334155; color: #94a3b8; border-color: #475569; }
+body.dark-mode .section-action-btn.edit:hover { background: var(--primary); color: white; }
+body.dark-mode .section-action-btn.regenerate { background: rgba(99, 102, 241, 0.2); }
+body.dark-mode .section-action-btn.reset { background: rgba(239, 68, 68, 0.2); }
+body.dark-mode .section-edit-mode { background: #334155; }
+body.dark-mode .section-edit-textarea { background: #1e293b; border-color: #475569; color: #e2e8f0; }
+body.dark-mode .section-edit-textarea:focus { border-color: var(--primary); }
+body.dark-mode .section-edit-actions .btn-secondary { background: #1e293b; border-color: #475569; color: #94a3b8; }
+body.dark-mode .section-edit-actions .btn-secondary:hover { border-color: #64748b; color: #e2e8f0; }
 body.dark-mode .plan-item { background: #0f172a; }
 body.dark-mode .plan-item p { color: #e2e8f0; }
 body.dark-mode .highlight-box { background: rgba(99, 102, 241, 0.15); }

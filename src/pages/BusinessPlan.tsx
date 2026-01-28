@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { SurveyQuestion, BusinessPlanAnswers } from '../types';
-import { Send, Lightbulb, ChevronRight, ChevronLeft, Save, Bot, Sparkles, Check, ArrowRight, HelpCircle, X, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Send, Lightbulb, ChevronRight, ChevronLeft, Save, Bot, Sparkles, Check, ArrowRight, HelpCircle, X, RefreshCw, AlertTriangle, Edit3, RotateCcw, Loader } from 'lucide-react';
+
+// Section IDs for tracking edits
+type SectionId = 'executive' | 'overview' | 'value' | 'market' | 'revenue' | 'marketing' | 'goals' | 'challenges' | 'financial' | 'focus';
+
+interface SectionEdits {
+  [key: string]: string;
+}
 
 // Term definitions for help tooltips
 const termDefinitions: { [key: string]: string } = {
@@ -164,12 +171,17 @@ const BusinessPlan: React.FC = () => {
   const [showComplete, setShowComplete] = useState(false);
   const [showDefinition, setShowDefinition] = useState<string | null>(null);
   const [showRedoConfirm, setShowRedoConfirm] = useState(false);
+  const [editingSection, setEditingSection] = useState<SectionId | null>(null);
+  const [sectionEdits, setSectionEdits] = useState<SectionEdits>({});
+  const [regeneratingSection, setRegeneratingSection] = useState<SectionId | null>(null);
+  const [editDraft, setEditDraft] = useState('');
 
   // Check if plan is already completed on load
   useEffect(() => {
     if (!user) return;
     const currentAnswers = localStorage.getItem(`expedium_answers_${user.id}`);
     const planCompleted = localStorage.getItem(`expedium_plan_completed_${user.id}`);
+    const savedEdits = localStorage.getItem(`expedium_section_edits_${user.id}`);
 
     if (currentAnswers) {
       const parsedAnswers = JSON.parse(currentAnswers);
@@ -180,7 +192,17 @@ const BusinessPlan: React.FC = () => {
         setShowComplete(true);
       }
     }
+
+    if (savedEdits) {
+      setSectionEdits(JSON.parse(savedEdits));
+    }
   }, [user]);
+
+  // Save section edits to localStorage
+  useEffect(() => {
+    if (!user || Object.keys(sectionEdits).length === 0) return;
+    localStorage.setItem(`expedium_section_edits_${user.id}`, JSON.stringify(sectionEdits));
+  }, [sectionEdits, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -248,11 +270,119 @@ const BusinessPlan: React.FC = () => {
     // Clear the completed flag and reset everything
     localStorage.removeItem(`expedium_plan_completed_${user.id}`);
     localStorage.removeItem(`expedium_answers_${user.id}`);
+    localStorage.removeItem(`expedium_section_edits_${user.id}`);
     setAnswers({});
+    setSectionEdits({});
     setCurrentQuestion(0);
     setShowComplete(false);
     setShowRedoConfirm(false);
     setAiChat([]);
+  };
+
+  // Start editing a section
+  const startEditing = (sectionId: SectionId, currentContent: string) => {
+    setEditingSection(sectionId);
+    setEditDraft(sectionEdits[sectionId] || currentContent);
+  };
+
+  // Save section edit
+  const saveEdit = (sectionId: SectionId) => {
+    setSectionEdits(prev => ({
+      ...prev,
+      [sectionId]: editDraft
+    }));
+    setEditingSection(null);
+    setEditDraft('');
+  };
+
+  // Cancel editing
+  const cancelEdit = () => {
+    setEditingSection(null);
+    setEditDraft('');
+  };
+
+  // Reset section to original AI-generated content
+  const resetSection = (sectionId: SectionId) => {
+    setSectionEdits(prev => {
+      const newEdits = { ...prev };
+      delete newEdits[sectionId];
+      return newEdits;
+    });
+  };
+
+  // Regenerate section content with AI
+  const regenerateSection = (sectionId: SectionId) => {
+    setRegeneratingSection(sectionId);
+
+    // Simulate AI generation with a delay
+    setTimeout(() => {
+      const newContent = generateSectionContent(sectionId);
+      setSectionEdits(prev => ({
+        ...prev,
+        [sectionId]: newContent
+      }));
+      setRegeneratingSection(null);
+    }, 1500);
+  };
+
+  // Generate new content for a specific section
+  const generateSectionContent = (sectionId: SectionId): string => {
+    const businessName = String(answers.business_name || 'Your Business');
+    const industry = Array.isArray(answers.industry) ? answers.industry.join(', ') : String(answers.industry || 'General');
+    const stage = String(answers.business_stage || 'Startup');
+    const targetMarket = String(answers.target_market || '');
+    const valueProposition = String(answers.value_proposition || '');
+    const revenueModel = Array.isArray(answers.revenue_model) ? answers.revenue_model : [];
+    const currentRevenue = String(answers.current_revenue || 'Pre-revenue');
+    const challenges = Array.isArray(answers.main_challenges) ? answers.main_challenges : [];
+    const marketingChannels = Array.isArray(answers.marketing_channels) ? answers.marketing_channels : [];
+    const goals = String(answers.goals_6month || '');
+    const funding = Array.isArray(answers.funding) ? answers.funding : [];
+    const helpNeeded = Array.isArray(answers.help_needed) ? answers.help_needed : [];
+
+    const variations = {
+      executive: [
+        `${businessName} represents a compelling opportunity in the ${industry} sector. As a ${stage.toLowerCase()} venture, the company is positioned to capitalize on growing market demand. The core value proposition centers on delivering exceptional outcomes for customers through innovative approaches. With a clear revenue strategy and strong market positioning, ${businessName} is poised for sustainable growth.`,
+        `In the competitive ${industry} landscape, ${businessName} stands out by focusing on customer-centric solutions. Currently at the ${stage.toLowerCase()} phase, the company combines industry expertise with innovative thinking to address real market needs. The business model is designed for scalability while maintaining the quality and personal touch that customers value.`,
+        `${businessName} is building the future of ${industry}. Founded with a vision to transform how customers experience products and services in this space, the company leverages modern strategies and proven business principles. At the ${stage.toLowerCase()} stage, ${businessName} is focused on establishing strong foundations for long-term success.`
+      ],
+      market: [
+        `The target market for ${businessName} represents a significant opportunity. ${targetMarket ? `Primary customers include ${targetMarket}.` : 'The company is identifying and validating its ideal customer segments.'} Market research indicates strong demand for the solutions offered, with customers actively seeking alternatives that deliver better value. ${marketingChannels.length > 0 ? `The go-to-market strategy leverages ${marketingChannels.slice(0, 2).join(' and ')} to reach and engage potential customers.` : 'A multi-channel marketing approach will be developed to maximize reach.'}`,
+        `Understanding customer needs is central to ${businessName}'s strategy. ${targetMarket ? `The ideal customer profile includes ${targetMarket}.` : 'Ongoing customer research is refining the target market definition.'} Competition analysis reveals opportunities for differentiation through superior customer experience and value delivery. ${marketingChannels.length > 0 ? `Key marketing channels include ${marketingChannels.join(', ')}.` : 'Marketing channel strategy is being developed based on customer behavior analysis.'}`,
+        `${businessName} operates in a dynamic market with evolving customer expectations. ${targetMarket ? `Target customers are ${targetMarket}, who seek solutions that save time, reduce costs, or improve outcomes.` : 'Customer research is ongoing to validate market assumptions.'} The competitive landscape presents opportunities for brands that can deliver authentic value and build trust. ${marketingChannels.length > 0 ? `Customer acquisition focuses on ${marketingChannels.slice(0, 3).join(', ')}.` : ''}`
+      ],
+      value: [
+        `What sets ${businessName} apart is a relentless focus on customer outcomes. ${valueProposition || 'The company delivers solutions that address real pain points in ways that competitors cannot match.'} This value proposition resonates with customers who are tired of one-size-fits-all solutions and seek partners who understand their unique needs.`,
+        `${businessName}'s unique value lies in combining ${industry} expertise with innovative delivery. ${valueProposition || 'Customers choose us because we solve their problems more effectively and efficiently than alternatives.'} This differentiation creates sustainable competitive advantage and drives customer loyalty.`,
+        `The core promise of ${businessName} is simple: deliver exceptional value that customers can measure. ${valueProposition || 'Our approach combines deep understanding of customer needs with innovative solutions that exceed expectations.'} This customer-first philosophy permeates every aspect of the business.`
+      ],
+      financial: [
+        `${businessName}'s financial strategy is built on sustainable unit economics and disciplined growth. Currently at ${currentRevenue} revenue stage, the focus is on achieving profitability while building for scale. ${funding.length > 0 ? `Funding through ${funding.join(', ').toLowerCase()} provides the runway needed to execute on growth initiatives.` : 'The company is exploring funding options that align with growth objectives.'} ${revenueModel.length > 0 ? `Revenue streams include ${revenueModel.join(', ').toLowerCase()}, providing diversification and stability.` : ''}`,
+        `Financial prudence guides ${businessName}'s approach to growth. At the ${currentRevenue} stage, every dollar is invested strategically to maximize returns. ${funding.length > 0 ? `The business is funded through ${funding.join(', ').toLowerCase()}.` : 'Funding strategy is aligned with growth milestones.'} Key financial metrics are tracked rigorously to ensure the business remains on path to profitability.`,
+        `${businessName} maintains a disciplined approach to financial management. ${currentRevenue !== 'Pre-revenue' ? `With ${currentRevenue} in monthly revenue, the business demonstrates product-market fit and customer willingness to pay.` : 'As a pre-revenue venture, the focus is on validating the business model and achieving first sales.'} ${funding.length > 0 ? `Funding sources include ${funding.join(', ').toLowerCase()}, providing stability as the business scales.` : ''}`
+      ],
+      goals: [
+        `In the next six months, ${businessName} will focus on: ${goals || 'establishing strong market presence, acquiring initial customers, and refining operations based on real-world feedback.'} These goals are designed to be ambitious yet achievable, creating momentum for long-term success. Key milestones include product/service refinement, customer acquisition targets, and operational efficiency improvements.`,
+        `The 6-month roadmap for ${businessName} prioritizes: ${goals || 'customer acquisition, revenue growth, and operational excellence.'} Each goal connects to the larger vision while remaining grounded in practical execution. Success metrics are defined for each objective to ensure accountability and progress tracking.`,
+        `Near-term priorities for ${businessName}: ${goals || 'validate product-market fit, build customer base, and establish scalable processes.'} These objectives balance growth ambitions with the need for sustainable operations. Regular review cycles will assess progress and enable course corrections as needed.`
+      ],
+      marketing: [
+        `${businessName}'s marketing strategy combines proven tactics with innovative approaches. ${marketingChannels.length > 0 ? `Primary channels include ${marketingChannels.join(', ')}, each optimized for customer acquisition and engagement.` : 'A comprehensive marketing plan is being developed to reach target customers effectively.'} The focus is on building authentic connections with customers through valuable content and exceptional experiences. Marketing ROI is tracked meticulously to ensure efficient use of resources.`,
+        `Customer acquisition at ${businessName} is driven by a multi-channel approach. ${marketingChannels.length > 0 ? `Key marketing channels are ${marketingChannels.slice(0, 3).join(', ')}, chosen based on where target customers spend their time.` : 'Marketing channels are being tested to identify the most effective customer acquisition paths.'} Brand building and direct response work together to create awareness, generate leads, and convert customers.`,
+        `Marketing for ${businessName} focuses on reaching the right customers with the right message at the right time. ${marketingChannels.length > 0 ? `The channel mix includes ${marketingChannels.join(', ')}.` : 'Channel strategy is being optimized based on customer behavior and competitive analysis.'} Content marketing, social proof, and strategic partnerships form the foundation of customer acquisition efforts.`
+      ],
+      focus: [
+        `${businessName}'s growth priorities are focused on areas with the highest potential impact. ${helpNeeded.length > 0 ? `Key focus areas include ${helpNeeded.join(', ')}, each representing an opportunity for significant improvement.` : 'Strategic priorities are aligned with the most pressing business needs.'} Resources are allocated to these priorities to ensure meaningful progress while maintaining day-to-day operations.`,
+        `Strategic focus areas for ${businessName} have been identified based on business needs and growth potential. ${helpNeeded.length > 0 ? `Priority areas are ${helpNeeded.slice(0, 3).join(', ')}.` : 'Focus areas are being refined through ongoing analysis.'} Each area has specific improvement targets and is tracked through regular reviews.`,
+        `${businessName} concentrates resources on high-impact initiatives. ${helpNeeded.length > 0 ? `Current priorities span ${helpNeeded.join(', ')}, representing the most important areas for near-term development.` : 'Focus areas are determined by business stage and strategic objectives.'} This focused approach ensures meaningful progress rather than spreading efforts too thin.`
+      ]
+    };
+
+    const options = variations[sectionId as keyof typeof variations];
+    if (options) {
+      return options[Math.floor(Math.random() * options.length)];
+    }
+    return 'Content regenerated. Edit this section to customize further.';
   };
 
   const generateAiResponse = (userMessage: string): string => {
@@ -414,8 +544,58 @@ const BusinessPlan: React.FC = () => {
           <div className="plan-content">
             {/* Executive Summary */}
             <section className="plan-section">
-              <h2>1. Executive Summary</h2>
-              <p>{plan.executiveSummary}</p>
+              <div className="section-header-row">
+                <h2>1. Executive Summary</h2>
+                <div className="section-actions">
+                  {editingSection !== 'executive' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('executive', sectionEdits.executive || plan.executiveSummary)}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('executive')}
+                        disabled={regeneratingSection === 'executive'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'executive' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'executive' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.executive && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('executive')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+              {editingSection === 'executive' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={6}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('executive')}>
+                      <Save size={16} /> Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p>{sectionEdits.executive || plan.executiveSummary}</p>
+              )}
             </section>
 
             {/* Business Overview */}
@@ -443,21 +623,123 @@ const BusinessPlan: React.FC = () => {
 
             {/* Value Proposition */}
             <section className="plan-section">
-              <h2>3. Value Proposition</h2>
-              <div className="highlight-box">
-                <p>{plan.valueProposition || 'Define what makes your business unique and why customers should choose you over competitors.'}</p>
+              <div className="section-header-row">
+                <h2>3. Value Proposition</h2>
+                <div className="section-actions">
+                  {editingSection !== 'value' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('value', sectionEdits.value || plan.valueProposition || '')}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('value')}
+                        disabled={regeneratingSection === 'value'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'value' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'value' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.value && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('value')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
+              {editingSection === 'value' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={4}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('value')}>
+                      <Save size={16} /> Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="highlight-box">
+                  <p>{sectionEdits.value || plan.valueProposition || 'Define what makes your business unique and why customers should choose you over competitors.'}</p>
+                </div>
+              )}
             </section>
 
             {/* Target Market */}
             <section className="plan-section">
-              <h2>4. Target Market & Customers</h2>
-              <p>{plan.marketAnalysis}</p>
-              {plan.targetMarket && plan.targetMarket !== 'Not specified' && (
-                <div className="detail-box">
-                  <h4>Ideal Customer Profile</h4>
-                  <p>{plan.targetMarket}</p>
+              <div className="section-header-row">
+                <h2>4. Target Market & Customers</h2>
+                <div className="section-actions">
+                  {editingSection !== 'market' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('market', sectionEdits.market || plan.marketAnalysis)}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('market')}
+                        disabled={regeneratingSection === 'market'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'market' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'market' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.market && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('market')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
+              </div>
+              {editingSection === 'market' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={6}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('market')}>
+                      <Save size={16} /> Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p>{sectionEdits.market || plan.marketAnalysis}</p>
+                  {plan.targetMarket && plan.targetMarket !== 'Not specified' && !sectionEdits.market && (
+                    <div className="detail-box">
+                      <h4>Ideal Customer Profile</h4>
+                      <p>{plan.targetMarket}</p>
+                    </div>
+                  )}
+                </>
               )}
             </section>
 
@@ -484,8 +766,58 @@ const BusinessPlan: React.FC = () => {
 
             {/* Marketing Strategy */}
             <section className="plan-section">
-              <h2>6. Marketing Strategy</h2>
-              {plan.marketingChannels.length > 0 ? (
+              <div className="section-header-row">
+                <h2>6. Marketing Strategy</h2>
+                <div className="section-actions">
+                  {editingSection !== 'marketing' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('marketing', sectionEdits.marketing || (plan.marketingChannels.length > 0 ? `Primary marketing channels: ${plan.marketingChannels.join(', ')}. Develop comprehensive strategies for each channel to maximize customer acquisition and engagement.` : 'Develop a marketing strategy that includes both online and offline channels appropriate for your target market.'))}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('marketing')}
+                        disabled={regeneratingSection === 'marketing'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'marketing' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'marketing' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.marketing && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('marketing')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+              {editingSection === 'marketing' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={6}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('marketing')}>
+                      <Save size={16} /> Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : sectionEdits.marketing ? (
+                <p>{sectionEdits.marketing}</p>
+              ) : plan.marketingChannels.length > 0 ? (
                 <>
                   <p>Primary marketing channels and customer acquisition strategies:</p>
                   <div className="channel-list">
@@ -501,19 +833,73 @@ const BusinessPlan: React.FC = () => {
 
             {/* Goals & Milestones */}
             <section className="plan-section">
-              <h2>7. Goals & Milestones (6 Months)</h2>
-              <div className="goals-box">
-                <p>{plan.goals || 'Set specific, measurable goals for the next 6 months.'}</p>
+              <div className="section-header-row">
+                <h2>7. Goals & Milestones (6 Months)</h2>
+                <div className="section-actions">
+                  {editingSection !== 'goals' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('goals', sectionEdits.goals || plan.goals || 'Set specific, measurable goals for the next 6 months.')}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('goals')}
+                        disabled={regeneratingSection === 'goals'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'goals' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'goals' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.goals && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('goals')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="milestone-tips">
-                <h4>Recommended Milestones:</h4>
-                <ul>
-                  <li><strong>Month 1-2:</strong> Validate your value proposition with initial customers</li>
-                  <li><strong>Month 2-3:</strong> Establish consistent marketing presence</li>
-                  <li><strong>Month 3-4:</strong> Optimize operations and gather feedback</li>
-                  <li><strong>Month 4-6:</strong> Scale what's working, pivot what isn't</li>
-                </ul>
-              </div>
+              {editingSection === 'goals' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={6}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('goals')}>
+                      <Save size={16} /> Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="goals-box">
+                    <p>{sectionEdits.goals || plan.goals || 'Set specific, measurable goals for the next 6 months.'}</p>
+                  </div>
+                  {!sectionEdits.goals && (
+                    <div className="milestone-tips">
+                      <h4>Recommended Milestones:</h4>
+                      <ul>
+                        <li><strong>Month 1-2:</strong> Validate your value proposition with initial customers</li>
+                        <li><strong>Month 2-3:</strong> Establish consistent marketing presence</li>
+                        <li><strong>Month 3-4:</strong> Optimize operations and gather feedback</li>
+                        <li><strong>Month 4-6:</strong> Scale what's working, pivot what isn't</li>
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
             </section>
 
             {/* Challenges & Solutions */}
@@ -536,33 +922,139 @@ const BusinessPlan: React.FC = () => {
 
             {/* Financial Overview */}
             <section className="plan-section">
-              <h2>9. Financial Overview & Funding</h2>
-              <p>{plan.financialOverview}</p>
-              {plan.funding.length > 0 && (
-                <div className="funding-sources">
-                  <h4>Funding Sources</h4>
-                  <div className="source-list">
-                    {plan.funding.map((source, idx) => (
-                      <span key={idx} className="source-tag">{source}</span>
-                    ))}
+              <div className="section-header-row">
+                <h2>9. Financial Overview & Funding</h2>
+                <div className="section-actions">
+                  {editingSection !== 'financial' && (
+                    <>
+                      <button
+                        className="section-action-btn edit"
+                        onClick={() => startEditing('financial', sectionEdits.financial || plan.financialOverview)}
+                        title="Edit this section"
+                      >
+                        <Edit3 size={16} /> Edit
+                      </button>
+                      <button
+                        className="section-action-btn regenerate"
+                        onClick={() => regenerateSection('financial')}
+                        disabled={regeneratingSection === 'financial'}
+                        title="Generate new AI content"
+                      >
+                        {regeneratingSection === 'financial' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                        {regeneratingSection === 'financial' ? 'Generating...' : 'AI Regenerate'}
+                      </button>
+                      {sectionEdits.financial && (
+                        <button
+                          className="section-action-btn reset"
+                          onClick={() => resetSection('financial')}
+                          title="Reset to original"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+              {editingSection === 'financial' ? (
+                <div className="section-edit-mode">
+                  <textarea
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    className="section-edit-textarea"
+                    rows={6}
+                  />
+                  <div className="section-edit-actions">
+                    <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                    <button className="btn-primary" onClick={() => saveEdit('financial')}>
+                      <Save size={16} /> Save Changes
+                    </button>
                   </div>
                 </div>
+              ) : (
+                <>
+                  <p>{sectionEdits.financial || plan.financialOverview}</p>
+                  {plan.funding.length > 0 && !sectionEdits.financial && (
+                    <div className="funding-sources">
+                      <h4>Funding Sources</h4>
+                      <div className="source-list">
+                        {plan.funding.map((source, idx) => (
+                          <span key={idx} className="source-tag">{source}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </section>
 
             {/* Areas for Growth */}
             {plan.helpNeeded.length > 0 && (
               <section className="plan-section">
-                <h2>10. Priority Focus Areas</h2>
-                <p>Based on your responses, these are the key areas to focus on for growth:</p>
-                <div className="focus-areas">
-                  {plan.helpNeeded.map((area, idx) => (
-                    <div key={idx} className="focus-item">
-                      <span className="focus-icon">→</span>
-                      <span>{area}</span>
-                    </div>
-                  ))}
+                <div className="section-header-row">
+                  <h2>10. Priority Focus Areas</h2>
+                  <div className="section-actions">
+                    {editingSection !== 'focus' && (
+                      <>
+                        <button
+                          className="section-action-btn edit"
+                          onClick={() => startEditing('focus', sectionEdits.focus || `Priority areas for growth:\n${plan.helpNeeded.map(a => `• ${a}`).join('\n')}`)}
+                          title="Edit this section"
+                        >
+                          <Edit3 size={16} /> Edit
+                        </button>
+                        <button
+                          className="section-action-btn regenerate"
+                          onClick={() => regenerateSection('focus')}
+                          disabled={regeneratingSection === 'focus'}
+                          title="Generate new AI content"
+                        >
+                          {regeneratingSection === 'focus' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
+                          {regeneratingSection === 'focus' ? 'Generating...' : 'AI Regenerate'}
+                        </button>
+                        {sectionEdits.focus && (
+                          <button
+                            className="section-action-btn reset"
+                            onClick={() => resetSection('focus')}
+                            title="Reset to original"
+                          >
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
+                {editingSection === 'focus' ? (
+                  <div className="section-edit-mode">
+                    <textarea
+                      value={editDraft}
+                      onChange={(e) => setEditDraft(e.target.value)}
+                      className="section-edit-textarea"
+                      rows={6}
+                    />
+                    <div className="section-edit-actions">
+                      <button className="btn-secondary" onClick={cancelEdit}>Cancel</button>
+                      <button className="btn-primary" onClick={() => saveEdit('focus')}>
+                        <Save size={16} /> Save Changes
+                      </button>
+                    </div>
+                  </div>
+                ) : sectionEdits.focus ? (
+                  <p style={{ whiteSpace: 'pre-line' }}>{sectionEdits.focus}</p>
+                ) : (
+                  <>
+                    <p>Based on your responses, these are the key areas to focus on for growth:</p>
+                    <div className="focus-areas">
+                      {plan.helpNeeded.map((area, idx) => (
+                        <div key={idx} className="focus-item">
+                          <span className="focus-icon">→</span>
+                          <span>{area}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </section>
             )}
 

@@ -17,6 +17,7 @@ import Strategy from './pages/Strategy';
 import Employees from './pages/Employees';
 import Marketing from './pages/Marketing';
 import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 import './App.css';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -169,7 +170,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </Router>

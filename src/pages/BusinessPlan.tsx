@@ -310,23 +310,28 @@ const BusinessPlan: React.FC = () => {
     });
   };
 
-  // Regenerate section content with AI
+  // Track which variation index was last used per section for cycling
+  const [variationIndices, setVariationIndices] = useState<Record<string, number>>({});
+
+  // Regenerate section content by cycling through variations
   const regenerateSection = (sectionId: SectionId) => {
     setRegeneratingSection(sectionId);
 
-    // Simulate AI generation with a delay
     setTimeout(() => {
-      const newContent = generateSectionContent(sectionId);
+      const currentIndex = variationIndices[sectionId] || 0;
+      const nextIndex = currentIndex + 1; // will be modded in generateSectionContent
+      setVariationIndices(prev => ({ ...prev, [sectionId]: nextIndex }));
+      const newContent = generateSectionContent(sectionId, nextIndex);
       setSectionEdits(prev => ({
         ...prev,
         [sectionId]: newContent
       }));
       setRegeneratingSection(null);
-    }, 1500);
+    }, 800);
   };
 
-  // Generate new content for a specific section
-  const generateSectionContent = (sectionId: SectionId): string => {
+  // Generate new content for a specific section, cycling through variations
+  const generateSectionContent = (sectionId: SectionId, index?: number): string => {
     const businessName = String(answers.business_name || 'Your Business');
     const industry = Array.isArray(answers.industry) ? answers.industry.join(', ') : String(answers.industry || 'General');
     const stage = String(answers.business_stage || 'Startup');
@@ -380,7 +385,8 @@ const BusinessPlan: React.FC = () => {
 
     const options = variations[sectionId as keyof typeof variations];
     if (options) {
-      return options[Math.floor(Math.random() * options.length)];
+      const idx = index !== undefined ? index % options.length : 0;
+      return options[idx];
     }
     return 'Content regenerated. Edit this section to customize further.';
   };
@@ -560,10 +566,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('executive')}
                         disabled={regeneratingSection === 'executive'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'executive' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'executive' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'executive' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'executive' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.executive && (
                         <button
@@ -639,10 +645,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('value')}
                         disabled={regeneratingSection === 'value'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'value' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'value' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'value' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'value' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.value && (
                         <button
@@ -697,10 +703,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('market')}
                         disabled={regeneratingSection === 'market'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'market' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'market' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'market' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'market' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.market && (
                         <button
@@ -782,10 +788,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('marketing')}
                         disabled={regeneratingSection === 'marketing'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'marketing' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'marketing' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'marketing' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'marketing' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.marketing && (
                         <button
@@ -849,10 +855,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('goals')}
                         disabled={regeneratingSection === 'goals'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'goals' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'goals' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'goals' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'goals' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.goals && (
                         <button
@@ -938,10 +944,10 @@ const BusinessPlan: React.FC = () => {
                         className="section-action-btn regenerate"
                         onClick={() => regenerateSection('financial')}
                         disabled={regeneratingSection === 'financial'}
-                        title="Generate new AI content"
+                        title="Generate a new variation"
                       >
-                        {regeneratingSection === 'financial' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                        {regeneratingSection === 'financial' ? 'Generating...' : 'AI Regenerate'}
+                        {regeneratingSection === 'financial' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                        {regeneratingSection === 'financial' ? 'Generating...' : 'Regenerate'}
                       </button>
                       {sectionEdits.financial && (
                         <button
@@ -1007,10 +1013,10 @@ const BusinessPlan: React.FC = () => {
                           className="section-action-btn regenerate"
                           onClick={() => regenerateSection('focus')}
                           disabled={regeneratingSection === 'focus'}
-                          title="Generate new AI content"
+                          title="Generate a new variation"
                         >
-                          {regeneratingSection === 'focus' ? <Loader size={16} className="spinning" /> : <Sparkles size={16} />}
-                          {regeneratingSection === 'focus' ? 'Generating...' : 'AI Regenerate'}
+                          {regeneratingSection === 'focus' ? <Loader size={16} className="spinning" /> : <RefreshCw size={16} />}
+                          {regeneratingSection === 'focus' ? 'Generating...' : 'Regenerate'}
                         </button>
                         {sectionEdits.focus && (
                           <button
@@ -1260,8 +1266,8 @@ const BusinessPlan: React.FC = () => {
       <div className={`ai-panel ${showAiPanel ? 'open' : ''}`}>
         <div className="ai-panel-header">
           <div className="ai-title">
-            <Sparkles size={20} />
-            <h3>Expedium AI Assistant</h3>
+            <HelpCircle size={20} />
+            <h3>Business Advisor</h3>
           </div>
           <button className="close-btn" onClick={() => setShowAiPanel(false)}>×</button>
         </div>

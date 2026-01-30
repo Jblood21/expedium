@@ -158,6 +158,24 @@ const Settings: React.FC = () => {
           return;
         }
 
+        // Auto-backup current data before overwriting
+        const backupData: { [key: string]: any } = {};
+        const prefix = `expedium_`;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(prefix) && key.includes(user?.id || '')) {
+            try {
+              backupData[key] = JSON.parse(localStorage.getItem(key) || '');
+            } catch {
+              backupData[key] = localStorage.getItem(key);
+            }
+          }
+        }
+        // Store the backup so it can be restored if something goes wrong
+        if (Object.keys(backupData).length > 0) {
+          localStorage.setItem(`expedium_backup_before_import_${user?.id}`, JSON.stringify(backupData));
+        }
+
         // Only import data that belongs to the current user
         const userIdPattern = user?.id || '';
         let importedCount = 0;
@@ -175,7 +193,7 @@ const Settings: React.FC = () => {
         });
 
         if (importedCount > 0) {
-          setSaveMessage(`Successfully imported ${importedCount} items. Refresh to see changes.`);
+          setSaveMessage(`Imported ${importedCount} items. A backup of your previous data was saved automatically. Refresh to see changes.`);
         } else {
           setSaveMessage('No matching data found to import.');
         }
@@ -382,14 +400,14 @@ const Settings: React.FC = () => {
           {/* Notifications Section */}
           {activeSection === 'notifications' && (
             <div className="settings-section">
-              <h2><Bell size={24} /> Notification Preferences</h2>
-              <p className="section-description">Control what notifications you receive</p>
+              <h2><Bell size={24} /> In-App Reminders</h2>
+              <p className="section-description">Choose which reminders appear in your notification bell. Expedium runs entirely in your browser — no emails are sent.</p>
 
               <div className="notification-options">
                 <div className="option-card">
                   <div className="option-info">
-                    <h4>Email Reminders</h4>
-                    <p>Receive email reminders for important tasks</p>
+                    <h4>Dashboard Tips</h4>
+                    <p>Show helpful tips and suggestions on your dashboard</p>
                   </div>
                   <button
                     className={`toggle-btn ${notifications.emailReminders ? 'active' : ''}`}
@@ -401,8 +419,8 @@ const Settings: React.FC = () => {
 
                 <div className="option-card">
                   <div className="option-info">
-                    <h4>Follow-up Alerts</h4>
-                    <p>Get notified when customer follow-ups are due</p>
+                    <h4>Follow-up Reminders</h4>
+                    <p>Remind you about upcoming customer follow-ups</p>
                   </div>
                   <button
                     className={`toggle-btn ${notifications.followUpAlerts ? 'active' : ''}`}
@@ -414,8 +432,8 @@ const Settings: React.FC = () => {
 
                 <div className="option-card">
                   <div className="option-info">
-                    <h4>Goal Reminders</h4>
-                    <p>Remind you about monthly goal progress</p>
+                    <h4>Goal Progress</h4>
+                    <p>Show notifications about your monthly goal progress</p>
                   </div>
                   <button
                     className={`toggle-btn ${notifications.goalReminders ? 'active' : ''}`}
@@ -427,8 +445,8 @@ const Settings: React.FC = () => {
 
                 <div className="option-card">
                   <div className="option-info">
-                    <h4>Weekly Digest</h4>
-                    <p>Receive a weekly summary of your business metrics</p>
+                    <h4>Phase Milestones</h4>
+                    <p>Notify you when you complete a business journey phase</p>
                   </div>
                   <button
                     className={`toggle-btn ${notifications.weeklyDigest ? 'active' : ''}`}
@@ -550,7 +568,7 @@ const Settings: React.FC = () => {
                   <p>What you can do with Expedium</p>
                   <ul>
                     <li><strong>Dashboard:</strong> Business overview at a glance</li>
-                    <li><strong>Business Plan:</strong> AI-assisted planning</li>
+                    <li><strong>Business Plan:</strong> Guided planning surveys</li>
                     <li><strong>Calculators:</strong> 14+ financial tools</li>
                     <li><strong>Customers:</strong> CRM with goal tracking</li>
                     <li><strong>Strategy:</strong> SWOT, goals, milestones</li>

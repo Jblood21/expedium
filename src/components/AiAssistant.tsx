@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { X, Send, Sparkles, Lightbulb, ChevronDown, Bot } from 'lucide-react';
+import { X, Send, Lightbulb, ChevronDown, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { generateSecureId } from '../utils/security';
 
@@ -326,7 +326,7 @@ const AiAssistant: React.FC = () => {
       setMessages([{
         id: 'welcome',
         type: 'assistant',
-        content: `Hi${businessName !== 'there' ? `, ${businessName}` : ''}! 👋 I'm your AI assistant.\n\nYou're on the **${context.title}** page. ${context.description}.\n\n**Quick tips for this page:**\n${context.tips.map(t => `• ${t}`).join('\n')}\n\nHow can I help you today?`
+        content: `Hi${businessName !== 'there' ? `, ${businessName}` : ''}! 👋 I'm your business advisor.\n\nYou're on the **${context.title}** page. ${context.description}.\n\n**Quick tips for this page:**\n${context.tips.map(t => `• ${t}`).join('\n')}\n\nTry one of the quick prompts below, or type a question!`
       }]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -376,9 +376,9 @@ const AiAssistant: React.FC = () => {
       <button
         className="ai-assistant-fab"
         onClick={() => setIsOpen(true)}
-        title="AI Assistant"
+        title="Business Advisor"
       >
-        <Bot size={24} />
+        <HelpCircle size={24} />
         <span className="fab-pulse" />
       </button>
     );
@@ -388,8 +388,8 @@ const AiAssistant: React.FC = () => {
     <div className={`ai-assistant-panel ${isMinimized ? 'minimized' : ''}`}>
       <div className="ai-assistant-header">
         <div className="ai-header-title">
-          <Sparkles size={20} />
-          <span>AI Assistant</span>
+          <HelpCircle size={20} />
+          <span>Business Advisor</span>
         </div>
         <div className="ai-header-actions">
           <button onClick={() => setIsMinimized(!isMinimized)} title={isMinimized ? 'Expand' : 'Minimize'}>
@@ -408,7 +408,7 @@ const AiAssistant: React.FC = () => {
               <div key={msg.id} className={`ai-message ${msg.type}`}>
                 {msg.type === 'assistant' && (
                   <div className="ai-avatar">
-                    <Bot size={16} />
+                    <HelpCircle size={16} />
                   </div>
                 )}
                 <div className="ai-message-content">
@@ -421,7 +421,7 @@ const AiAssistant: React.FC = () => {
             {isTyping && (
               <div className="ai-message assistant">
                 <div className="ai-avatar">
-                  <Bot size={16} />
+                  <HelpCircle size={16} />
                 </div>
                 <div className="ai-typing">
                   <span></span><span></span><span></span>

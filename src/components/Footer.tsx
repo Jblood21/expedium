@@ -1,5 +1,6 @@
 import React from 'react';
-import { Zap, Heart, Github, Twitter, Linkedin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Zap, Heart } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -17,41 +18,29 @@ const Footer: React.FC = () => {
 
         <div className="footer-links">
           <div className="footer-section">
-            <h4>Product</h4>
+            <h4>Tools</h4>
             <ul>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="#updates">Updates</a></li>
+              <li><Link to="/dashboard">Dashboard</Link></li>
+              <li><Link to="/calculators">Calculators</Link></li>
+              <li><Link to="/finances">Finances</Link></li>
             </ul>
           </div>
           <div className="footer-section">
-            <h4>Resources</h4>
+            <h4>Plan</h4>
             <ul>
-              <li><a href="#guides">Guides</a></li>
-              <li><a href="#help">Help Center</a></li>
-              <li><a href="#blog">Blog</a></li>
+              <li><Link to="/business-plan">Business Plan</Link></li>
+              <li><Link to="/strategy">Strategy</Link></li>
+              <li><Link to="/documents">Documents</Link></li>
             </ul>
           </div>
           <div className="footer-section">
-            <h4>Company</h4>
+            <h4>Manage</h4>
             <ul>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li><a href="#careers">Careers</a></li>
+              <li><Link to="/customers">Customers</Link></li>
+              <li><Link to="/employees">Employees</Link></li>
+              <li><Link to="/marketing">Marketing</Link></li>
             </ul>
           </div>
-        </div>
-
-        <div className="footer-social">
-          <a href="#twitter" className="social-link" aria-label="Twitter">
-            <Twitter size={20} />
-          </a>
-          <a href="#linkedin" className="social-link" aria-label="LinkedIn">
-            <Linkedin size={20} />
-          </a>
-          <a href="#github" className="social-link" aria-label="GitHub">
-            <Github size={20} />
-          </a>
         </div>
       </div>
 
@@ -61,9 +50,9 @@ const Footer: React.FC = () => {
           Made with <Heart size={14} fill="#ef4444" color="#ef4444" /> for small businesses
         </p>
         <div className="footer-legal">
-          <a href="#privacy">Privacy Policy</a>
-          <span>·</span>
-          <a href="#terms">Terms of Service</a>
+          <Link to="/resources">Resources</Link>
+          <span>&middot;</span>
+          <Link to="/settings">Settings</Link>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -6,6 +6,7 @@ import {
   Menu, X, User, BookOpen, FileText, DollarSign, Target, Megaphone,
   Settings, Search, Bell, Check
 } from 'lucide-react';
+import { getPhaseProgress } from '../utils/phaseTracker';
 
 interface Notification {
   id: string;
@@ -43,6 +44,14 @@ const Navigation: React.FC = () => {
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Phase progress
+  const phaseProgress = useMemo(() => {
+    if (!user) return null;
+    const planCompleted = localStorage.getItem(`expedium_plan_completed_${user.id}`);
+    if (!planCompleted) return null;
+    return getPhaseProgress(user.id);
+  }, [user]);
 
   const allNavItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -227,6 +236,26 @@ const Navigation: React.FC = () => {
               <div className="search-empty">No pages found</div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Phase Progress Bar */}
+      {phaseProgress && (
+        <div className="nav-phase-bar">
+          <NavLink to="/dashboard" className="nav-phase-indicator">
+            <span className="nav-phase-label">
+              Phase {phaseProgress.currentPhaseIndex + 1}: {phaseProgress.phaseStatuses[phaseProgress.currentPhaseIndex].phase.name}
+            </span>
+            <div className="nav-phase-dots">
+              {phaseProgress.phaseStatuses.map((ps) => (
+                <div
+                  key={ps.phase.id}
+                  className={`nav-phase-dot ${ps.isComplete ? 'done' : ps.isCurrent ? 'active' : ''}`}
+                />
+              ))}
+            </div>
+            <span className="nav-phase-percent">{phaseProgress.overallPercent}%</span>
+          </NavLink>
         </div>
       )}
     </nav>

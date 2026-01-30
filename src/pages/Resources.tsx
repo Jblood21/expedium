@@ -45,6 +45,111 @@ interface Competitor {
   threatLevel: 'high' | 'medium' | 'low';
 }
 
+// Database of real-world competitors by business type keywords
+interface CompetitorTemplate {
+  keywords: string[];
+  competitors: {
+    name: string;
+    website: string;
+    description: string;
+    products: { name: string; price: string; description: string }[];
+    strengths: string[];
+    weaknesses: string[];
+  }[];
+}
+
+const competitorDatabase: CompetitorTemplate[] = [
+  {
+    keywords: ['business', 'startup', 'entrepreneur', 'build business', 'launch business', 'start business', 'business plan', 'business building', 'business platform'],
+    competitors: [
+      { name: 'LivePlan', website: 'www.liveplan.com', description: 'Business planning software that helps entrepreneurs create professional business plans with financial forecasting tools.', products: [{ name: 'Standard', price: '$20/mo', description: 'Business plan creation tools' }, { name: 'Premium', price: '$40/mo', description: 'Full features + pitch builder' }], strengths: ['Well-known brand', 'SBA recommended', 'Financial forecasting'], weaknesses: ['Limited customization', 'Dated interface'] },
+      { name: 'Enloop', website: 'www.enloop.com', description: 'Automated business plan writing software with financial projections and performance scoring.', products: [{ name: 'Free', price: '$0', description: 'Basic plan creation' }, { name: 'Detailed', price: '$19.95/mo', description: 'Full features' }], strengths: ['Auto-generated text', 'Performance score', 'Affordable'], weaknesses: ['Generic content', 'Limited industries'] },
+      { name: 'Bizplan', website: 'www.bizplan.com', description: 'Modern business planning platform with drag-and-drop builder and investor-ready templates.', products: [{ name: 'Monthly', price: '$29/mo', description: 'All features' }, { name: 'Lifetime', price: '$349', description: 'One-time payment' }], strengths: ['Modern interface', 'Investor network', 'Easy to use'], weaknesses: ['Newer platform', 'Less established'] },
+      { name: 'IdeaBuddy', website: 'www.ideabuddy.com', description: 'Business idea validation and planning tool for early-stage entrepreneurs.', products: [{ name: 'Dreamer', price: '$0', description: 'Idea development' }, { name: 'Founder', price: '$15/mo', description: 'Full business planning' }], strengths: ['Idea validation', 'Step-by-step guidance', 'Low cost'], weaknesses: ['Less comprehensive', 'Smaller user base'] },
+      { name: 'Upmetrics', website: 'www.upmetrics.co', description: 'AI-powered business planning software with collaborative features and pitch deck creation.', products: [{ name: 'Starter', price: '$9/mo', description: 'Solo planning' }, { name: 'Premium', price: '$19/mo', description: 'Team collaboration' }], strengths: ['AI assistance', 'Collaboration', 'Affordable'], weaknesses: ['Newer company', 'Limited integrations'] },
+    ]
+  },
+  {
+    keywords: ['app', 'application', 'software', 'saas', 'platform', 'tool', 'mobile app', 'web app', 'tech'],
+    competitors: [
+      { name: 'Bubble', website: 'www.bubble.io', description: 'No-code platform for building web applications without programming knowledge.', products: [{ name: 'Free', price: '$0', description: 'Learning & testing' }, { name: 'Starter', price: '$29/mo', description: 'Launch apps' }, { name: 'Growth', price: '$119/mo', description: 'Scale apps' }], strengths: ['No-code', 'Large community', 'Powerful features'], weaknesses: ['Learning curve', 'Performance limits'] },
+      { name: 'Webflow', website: 'www.webflow.com', description: 'Visual web development platform combining design and CMS capabilities.', products: [{ name: 'Starter', price: '$14/mo', description: 'Basic sites' }, { name: 'CMS', price: '$23/mo', description: 'Dynamic content' }], strengths: ['Beautiful design', 'No-code', 'Professional output'], weaknesses: ['Complex pricing', 'Limited backend'] },
+      { name: 'Adalo', website: 'www.adalo.com', description: 'No-code mobile and web app builder with native app publishing.', products: [{ name: 'Free', price: '$0', description: 'Testing' }, { name: 'Starter', price: '$45/mo', description: 'Publish apps' }], strengths: ['Native apps', 'Easy to use', 'Quick launch'], weaknesses: ['Limited features', 'Performance issues'] },
+      { name: 'Glide', website: 'www.glideapps.com', description: 'Build apps from spreadsheets with a simple drag-and-drop interface.', products: [{ name: 'Free', price: '$0', description: 'Personal use' }, { name: 'Pro', price: '$25/mo', description: 'Business features' }], strengths: ['Spreadsheet-based', 'Very easy', 'Fast deployment'], weaknesses: ['Limited customization', 'Spreadsheet dependency'] },
+    ]
+  },
+  {
+    keywords: ['ecommerce', 'online store', 'sell online', 'shop', 'retail', 'products', 'dropshipping', 'marketplace'],
+    competitors: [
+      { name: 'Shopify', website: 'www.shopify.com', description: 'Leading e-commerce platform powering millions of online stores worldwide.', products: [{ name: 'Basic', price: '$39/mo', description: 'New businesses' }, { name: 'Shopify', price: '$105/mo', description: 'Growing businesses' }, { name: 'Advanced', price: '$399/mo', description: 'Scaling businesses' }], strengths: ['Market leader', 'Huge app store', 'Reliable'], weaknesses: ['Transaction fees', 'Expensive at scale'] },
+      { name: 'WooCommerce', website: 'www.woocommerce.com', description: 'Open-source e-commerce plugin for WordPress with extensive customization.', products: [{ name: 'Core', price: 'Free', description: 'Basic store' }, { name: 'Extensions', price: '$49-299', description: 'Add-ons' }], strengths: ['Free core', 'Highly customizable', 'WordPress integration'], weaknesses: ['Technical knowledge needed', 'Hosting costs'] },
+      { name: 'BigCommerce', website: 'www.bigcommerce.com', description: 'Enterprise e-commerce solution with built-in features and multi-channel selling.', products: [{ name: 'Standard', price: '$39/mo', description: 'Essential features' }, { name: 'Plus', price: '$105/mo', description: 'Marketing tools' }], strengths: ['No transaction fees', 'Built-in features', 'Multi-channel'], weaknesses: ['Sales limits', 'Less flexible'] },
+      { name: 'Squarespace', website: 'www.squarespace.com', description: 'Beautiful website builder with integrated e-commerce capabilities.', products: [{ name: 'Business', price: '$27/mo', description: 'Basic commerce' }, { name: 'Commerce', price: '$42/mo', description: 'Full e-commerce' }], strengths: ['Stunning templates', 'All-in-one', 'Easy to use'], weaknesses: ['Limited e-commerce features', 'Transaction fees'] },
+    ]
+  },
+  {
+    keywords: ['consulting', 'coach', 'coaching', 'advisor', 'consultant', 'mentor', 'training', 'course', 'education'],
+    competitors: [
+      { name: 'Kajabi', website: 'www.kajabi.com', description: 'All-in-one platform for coaches and course creators to sell knowledge products.', products: [{ name: 'Basic', price: '$149/mo', description: '3 products' }, { name: 'Growth', price: '$199/mo', description: '15 products' }, { name: 'Pro', price: '$399/mo', description: 'Unlimited' }], strengths: ['All-in-one', 'No transaction fees', 'Polished'], weaknesses: ['Expensive', 'Learning curve'] },
+      { name: 'Teachable', website: 'www.teachable.com', description: 'Course creation platform with marketing tools and student management.', products: [{ name: 'Free', price: '$0 + fees', description: 'Basic courses' }, { name: 'Basic', price: '$59/mo', description: 'Custom domain' }, { name: 'Pro', price: '$159/mo', description: 'Advanced features' }], strengths: ['Easy to use', 'Good free tier', 'Reliable'], weaknesses: ['Transaction fees', 'Limited customization'] },
+      { name: 'Thinkific', website: 'www.thinkific.com', description: 'Course platform focused on creating and selling online learning experiences.', products: [{ name: 'Free', price: '$0', description: '1 course' }, { name: 'Basic', price: '$49/mo', description: 'Unlimited courses' }], strengths: ['No transaction fees', 'Good free plan', 'Flexible'], weaknesses: ['Marketing tools limited', 'Less community'] },
+      { name: 'Podia', website: 'www.podia.com', description: 'Simple platform for selling courses, memberships, and digital downloads.', products: [{ name: 'Mover', price: '$39/mo', description: 'Core features' }, { name: 'Shaker', price: '$89/mo', description: 'Full features' }], strengths: ['Simple pricing', 'Easy to use', 'Good support'], weaknesses: ['Fewer features', 'Less customization'] },
+    ]
+  },
+  {
+    keywords: ['marketing', 'advertising', 'social media', 'seo', 'digital marketing', 'content', 'agency', 'brand', 'ads'],
+    competitors: [
+      { name: 'HubSpot', website: 'www.hubspot.com', description: 'Comprehensive inbound marketing, sales, and CRM platform for growing businesses.', products: [{ name: 'Starter', price: '$50/mo', description: 'Basic tools' }, { name: 'Professional', price: '$890/mo', description: 'Full marketing suite' }], strengths: ['All-in-one', 'Free CRM', 'Great education'], weaknesses: ['Expensive', 'Complex'] },
+      { name: 'Mailchimp', website: 'www.mailchimp.com', description: 'Email marketing platform with automation and audience management tools.', products: [{ name: 'Free', price: '$0', description: 'Basic email' }, { name: 'Essentials', price: '$13/mo', description: 'Email templates' }, { name: 'Standard', price: '$20/mo', description: 'Automation' }], strengths: ['Easy to use', 'Good free tier', 'Reliable'], weaknesses: ['Limited at scale', 'Price increases'] },
+      { name: 'Hootsuite', website: 'www.hootsuite.com', description: 'Social media management platform for scheduling and analytics.', products: [{ name: 'Professional', price: '$99/mo', description: '10 accounts' }, { name: 'Team', price: '$249/mo', description: '20 accounts' }], strengths: ['Multi-platform', 'Team features', 'Analytics'], weaknesses: ['Expensive', 'Can be buggy'] },
+      { name: 'Semrush', website: 'www.semrush.com', description: 'SEO and competitive research toolkit for digital marketers.', products: [{ name: 'Pro', price: '$129/mo', description: 'Essential tools' }, { name: 'Guru', price: '$249/mo', description: 'Full toolkit' }], strengths: ['Comprehensive data', 'Trusted', 'Detailed insights'], weaknesses: ['Expensive', 'Overwhelming'] },
+    ]
+  },
+  {
+    keywords: ['fitness', 'gym', 'health', 'wellness', 'workout', 'personal training', 'nutrition', 'weight loss', 'exercise'],
+    competitors: [
+      { name: 'Mindbody', website: 'www.mindbodyonline.com', description: 'Booking and business management software for fitness and wellness businesses.', products: [{ name: 'Starter', price: '$129/mo', description: 'Basic booking' }, { name: 'Accelerate', price: '$279/mo', description: 'Marketing tools' }], strengths: ['Industry standard', 'Consumer app', 'Full featured'], weaknesses: ['Expensive', 'Complex setup'] },
+      { name: 'Trainerize', website: 'www.trainerize.com', description: 'Personal training software for delivering workouts and nutrition plans.', products: [{ name: 'Grow', price: '$5/mo per client', description: 'Core training tools' }, { name: 'Pro', price: '$20/mo per client', description: 'Full features' }], strengths: ['Client-focused', 'Good app', 'Workout library'], weaknesses: ['Per-client pricing', 'Limited customization'] },
+      { name: 'My PT Hub', website: 'www.mypthub.net', description: 'Online personal training platform with workout and nutrition tracking.', products: [{ name: 'Free', price: '$0', description: '2 clients' }, { name: 'Standard', price: '$40/mo', description: 'Unlimited clients' }], strengths: ['Affordable', 'Good features', 'Nutrition tools'], weaknesses: ['Dated interface', 'Limited integrations'] },
+      { name: 'TrueCoach', website: 'www.truecoach.co', description: 'Programming and client management for personal trainers and coaches.', products: [{ name: 'Starter', price: '$19/mo', description: '5 clients' }, { name: 'Standard', price: '$49/mo', description: '20 clients' }], strengths: ['Clean interface', 'Easy programming', 'Good support'], weaknesses: ['Limited marketing', 'Basic analytics'] },
+    ]
+  },
+  {
+    keywords: ['food', 'restaurant', 'catering', 'meal', 'delivery', 'kitchen', 'chef', 'cooking', 'recipes'],
+    competitors: [
+      { name: 'Toast', website: 'www.toasttab.com', description: 'Restaurant management platform with POS, online ordering, and delivery.', products: [{ name: 'Starter Kit', price: '$0 + fees', description: 'Basic POS' }, { name: 'Essentials', price: '$165/mo', description: 'Full restaurant suite' }], strengths: ['Restaurant-focused', 'Hardware included', 'Reliable'], weaknesses: ['Long contracts', 'Add-on costs'] },
+      { name: 'Square for Restaurants', website: 'www.squareup.com/restaurants', description: 'POS and restaurant management system with integrated payments.', products: [{ name: 'Free', price: '$0 + fees', description: 'Basic POS' }, { name: 'Plus', price: '$60/mo', description: 'Advanced features' }], strengths: ['No monthly fee option', 'Easy setup', 'Good ecosystem'], weaknesses: ['Processing fees', 'Limited features'] },
+      { name: 'ChowNow', website: 'www.chownow.com', description: 'Commission-free online ordering system for restaurants.', products: [{ name: 'Basic', price: '$149/mo', description: 'Online ordering' }, { name: 'Pro', price: '$249/mo', description: 'Marketing tools' }], strengths: ['No commissions', 'Branded experience', 'Marketing tools'], weaknesses: ['Monthly fee', 'Limited integrations'] },
+    ]
+  },
+  {
+    keywords: ['real estate', 'property', 'homes', 'houses', 'realtor', 'broker', 'rental', 'landlord', 'mortgage', 'housing'],
+    competitors: [
+      { name: 'Zillow', website: 'www.zillow.com', description: 'Real estate marketplace with listings, Zestimates, and agent connections.', products: [{ name: 'Premier Agent', price: '$300-1000+/mo', description: 'Lead generation' }], strengths: ['Massive traffic', 'Brand recognition', 'Comprehensive data'], weaknesses: ['Expensive leads', 'Competition'] },
+      { name: 'Realtor.com', website: 'www.realtor.com', description: 'Official real estate listings site of the National Association of Realtors.', products: [{ name: 'Connections Plus', price: '$200-500/mo', description: 'Leads & marketing' }], strengths: ['Official listings', 'Accurate data', 'Trusted brand'], weaknesses: ['High competition', 'Lead quality varies'] },
+      { name: 'Redfin', website: 'www.redfin.com', description: 'Tech-powered real estate brokerage with lower commission rates.', products: [{ name: 'Listing Service', price: '1-1.5% commission', description: 'Full service' }], strengths: ['Lower fees', 'Tech-forward', 'Good UX'], weaknesses: ['Less personal service', 'Limited markets'] },
+    ]
+  },
+  {
+    keywords: ['finance', 'accounting', 'bookkeeping', 'tax', 'investment', 'banking', 'money', 'financial', 'budget'],
+    competitors: [
+      { name: 'QuickBooks', website: 'www.quickbooks.intuit.com', description: 'Small business accounting software with invoicing, expenses, and payroll.', products: [{ name: 'Simple Start', price: '$30/mo', description: 'Basic accounting' }, { name: 'Essentials', price: '$60/mo', description: 'Bill pay & time' }, { name: 'Plus', price: '$90/mo', description: 'Inventory & projects' }], strengths: ['Industry standard', 'Full-featured', 'Integrations'], weaknesses: ['Expensive', 'Steep learning curve'] },
+      { name: 'FreshBooks', website: 'www.freshbooks.com', description: 'Cloud accounting designed for service-based small businesses.', products: [{ name: 'Lite', price: '$17/mo', description: '5 clients' }, { name: 'Plus', price: '$30/mo', description: '50 clients' }], strengths: ['Easy invoicing', 'Great UX', 'Time tracking'], weaknesses: ['Limited accounting', 'Client limits'] },
+      { name: 'Wave', website: 'www.waveapps.com', description: 'Free accounting and invoicing software for small businesses.', products: [{ name: 'Accounting', price: 'Free', description: 'Full accounting' }, { name: 'Payroll', price: '$40/mo base', description: 'Payroll services' }], strengths: ['Free accounting', 'Easy to use', 'Unlimited invoicing'], weaknesses: ['Limited support', 'Payment fees'] },
+      { name: 'Xero', website: 'www.xero.com', description: 'Cloud-based accounting platform with strong bank connections and features.', products: [{ name: 'Early', price: '$15/mo', description: 'Basic features' }, { name: 'Growing', price: '$42/mo', description: 'Full features' }], strengths: ['Modern interface', 'Bank feeds', 'Multi-currency'], weaknesses: ['Learning curve', 'US payroll limited'] },
+    ]
+  },
+  {
+    keywords: ['crm', 'sales', 'leads', 'customers', 'client management', 'pipeline', 'sales team', 'customer relationship'],
+    competitors: [
+      { name: 'Salesforce', website: 'www.salesforce.com', description: 'Enterprise CRM platform powering sales teams at companies of all sizes.', products: [{ name: 'Essentials', price: '$25/user/mo', description: 'Basic CRM' }, { name: 'Professional', price: '$80/user/mo', description: 'Full CRM' }], strengths: ['Industry leader', 'Highly customizable', 'Ecosystem'], weaknesses: ['Expensive', 'Complex'] },
+      { name: 'HubSpot CRM', website: 'www.hubspot.com/crm', description: 'Free CRM with sales, marketing, and customer service tools.', products: [{ name: 'Free', price: '$0', description: 'Basic CRM' }, { name: 'Starter', price: '$50/mo', description: 'Essential tools' }], strengths: ['Free tier', 'Easy to use', 'All-in-one'], weaknesses: ['Limited free features', 'Expensive upgrades'] },
+      { name: 'Pipedrive', website: 'www.pipedrive.com', description: 'Sales-focused CRM designed for small sales teams.', products: [{ name: 'Essential', price: '$14.90/user/mo', description: 'Basic pipeline' }, { name: 'Advanced', price: '$27.90/user/mo', description: 'Email & automation' }], strengths: ['Visual pipeline', 'Easy to use', 'Affordable'], weaknesses: ['Limited marketing', 'Basic reporting'] },
+      { name: 'Zoho CRM', website: 'www.zoho.com/crm', description: 'Comprehensive CRM with AI assistant and automation features.', products: [{ name: 'Free', price: '$0', description: '3 users' }, { name: 'Standard', price: '$20/user/mo', description: 'Core features' }], strengths: ['Affordable', 'Feature-rich', 'Zoho ecosystem'], weaknesses: ['Dated UI', 'Learning curve'] },
+    ]
+  },
+];
+
 const Resources: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('guides');
@@ -54,6 +159,8 @@ const Resources: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingCount, setGeneratingCount] = useState(0);
   const [businessData, setBusinessData] = useState<any>(null);
+  const [noMatchesFound, setNoMatchesFound] = useState(false);
+  const [matchedCategory, setMatchedCategory] = useState<string>('');
 
   // Load business plan data and saved competitors
   useEffect(() => {
@@ -75,108 +182,60 @@ const Resources: React.FC = () => {
     localStorage.setItem(`expedium_competitors_${user.id}`, JSON.stringify(competitors));
   }, [competitors, user]);
 
-  // AI competitor generation based on business data
-  const generateCompetitor = (): Competitor => {
-    const industries = businessData?.industry || ['General'];
-    const industry = Array.isArray(industries) ? industries[0] : industries;
-    const revenueModels = businessData?.revenue_model || [];
+  // Analyze business and find matching competitor category
+  const analyzeBusinessType = (): { category: CompetitorTemplate | null; matchScore: number; matchedKeywords: string[] } => {
+    if (!businessData) return { category: null, matchScore: 0, matchedKeywords: [] };
+
+    const businessName = (businessData.business_name || '').toLowerCase();
+    const valueProposition = (businessData.value_proposition || '').toLowerCase();
+    const targetMarket = (businessData.target_market || '').toLowerCase();
+    const industries = Array.isArray(businessData.industry) ? businessData.industry.join(' ').toLowerCase() : (businessData.industry || '').toLowerCase();
+
+    // Combine all text for analysis
+    const fullText = `${businessName} ${valueProposition} ${targetMarket} ${industries}`;
+
+    let bestMatch: CompetitorTemplate | null = null;
+    let highestScore = 0;
+    let matchedKeywords: string[] = [];
+
+    for (const template of competitorDatabase) {
+      let score = 0;
+      const matched: string[] = [];
+
+      for (const keyword of template.keywords) {
+        if (fullText.includes(keyword.toLowerCase())) {
+          score += keyword.split(' ').length; // Multi-word keywords score higher
+          matched.push(keyword);
+        }
+      }
+
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = template;
+        matchedKeywords = matched;
+      }
+    }
+
+    return { category: bestMatch, matchScore: highestScore, matchedKeywords };
+  };
+
+  // AI competitor generation based on specific business type
+  const generateCompetitor = (): Competitor | null => {
+    const { category } = analyzeBusinessType();
+
+    if (!category || category.competitors.length === 0) {
+      return null;
+    }
+
     const stage = businessData?.business_stage || 'Startup';
-
-    // Competitor name templates based on industry
-    const nameTemplates: { [key: string]: string[] } = {
-      'Technology': ['TechFlow', 'ByteCore', 'CloudNine Solutions', 'DataPulse', 'NexGen Systems', 'CodeCraft', 'DigiWave', 'SyncTech', 'InnovateTech', 'PrismData'],
-      'Retail': ['ShopSmart', 'ValueMart', 'TrendSetters', 'PrimeGoods', 'UrbanStyle', 'QuickShop', 'StyleHub', 'MegaSave', 'FreshChoice', 'DealZone'],
-      'Healthcare': ['HealthFirst', 'MediCare Plus', 'VitalWell', 'CareConnect', 'HealthBridge', 'WellnessHub', 'MedTrust', 'LifeCare', 'PulseMed', 'HealRight'],
-      'Food & Beverage': ['FreshBite', 'TastyHub', 'FlavorKing', 'GourmetGo', 'QuickEats', 'FoodFusion', 'TasteMakers', 'SavorMore', 'ChefChoice', 'BiteBox'],
-      'Professional Services': ['ProConsult', 'ExpertEdge', 'StrategicMinds', 'EliteAdvisors', 'PrimePartners', 'InsightPro', 'TopTier Solutions', 'CoreStrategy', 'ApexAdvisory', 'TrustBridge'],
-      'E-commerce': ['ShipQuick', 'BuyDirect', 'MarketPlace Pro', 'ClickCart', 'OnlineHaven', 'eShopNow', 'CartGenius', 'WebMart', 'DigitalBazaar', 'SwiftShop'],
-      'Finance': ['WealthWise', 'MoneyMasters', 'CapitalCore', 'FinanceFirst', 'InvestRight', 'SecureFunds', 'PrimeCapital', 'TrustFinance', 'GrowWealth', 'SmartMoney'],
-      'Education': ['LearnPro', 'EduSmart', 'KnowledgeHub', 'SkillUp Academy', 'MindGrow', 'StudySphere', 'ClassMaster', 'BrightPath', 'EduExcel', 'LearnQuest'],
-      'Manufacturing': ['MakeTech', 'BuildPro', 'IndustrialEdge', 'PrecisionWorks', 'FactoryPlus', 'CraftCore', 'MetalMasters', 'ProducePro', 'AssemblyKing', 'QualityMake'],
-      'Real Estate': ['PropertyPro', 'HomeFirst', 'RealtyMax', 'EstateEdge', 'PrimePlaces', 'LandMark', 'DreamHomes', 'SpaceFind', 'UrbanRealty', 'HomeTrust'],
-      'Entertainment': ['FunZone', 'PlayMax', 'ShowTime', 'EventPro', 'JoyHub', 'ThrillWorks', 'StarLight', 'EntertainAll', 'FestiveFun', 'GalaxyPlay'],
-      'default': ['GlobalCorp', 'MarketLeaders', 'IndustryPro', 'PremierChoice', 'EliteBusiness', 'TopNotch Co', 'NextLevel', 'ProEdge', 'CoreBusiness', 'PrimeGroup']
-    };
-
-    const industryNames = nameTemplates[industry] || nameTemplates['default'];
     const usedNames = competitors.map(c => c.name);
-    const availableNames = industryNames.filter(n => !usedNames.includes(n));
-    const compName = availableNames.length > 0
-      ? availableNames[Math.floor(Math.random() * availableNames.length)]
-      : `${industry} Competitor ${competitors.length + 1}`;
+    const availableCompetitors = category.competitors.filter(c => !usedNames.includes(c.name));
 
-    // Generate products based on revenue model
-    const productTemplates: { [key: string]: { name: string; price: string; description: string }[] } = {
-      'Product Sales': [
-        { name: 'Standard Package', price: '$49-199', description: 'Entry-level product offering' },
-        { name: 'Premium Package', price: '$299-599', description: 'Advanced features and support' },
-        { name: 'Enterprise Solution', price: '$999+', description: 'Full-featured for large organizations' }
-      ],
-      'Service Fees': [
-        { name: 'Basic Service', price: '$75-150/hr', description: 'Standard consulting/service rate' },
-        { name: 'Project Package', price: '$2,000-10,000', description: 'Fixed-price project work' },
-        { name: 'Retainer', price: '$1,500-5,000/mo', description: 'Ongoing service agreement' }
-      ],
-      'Subscription Model': [
-        { name: 'Starter Plan', price: '$9-29/mo', description: 'Basic features for individuals' },
-        { name: 'Professional', price: '$49-99/mo', description: 'Full features for small teams' },
-        { name: 'Enterprise', price: '$199-499/mo', description: 'Custom solutions with support' }
-      ],
-      'Consulting': [
-        { name: 'Strategy Session', price: '$250-500', description: 'One-time consulting session' },
-        { name: 'Advisory Package', price: '$2,500-7,500', description: 'Ongoing strategic guidance' },
-        { name: 'Full Engagement', price: '$10,000-50,000', description: 'Comprehensive consulting project' }
-      ],
-      'default': [
-        { name: 'Core Offering', price: '$99-299', description: 'Main product or service' },
-        { name: 'Add-on Services', price: '$49-149', description: 'Supplementary offerings' },
-        { name: 'Premium Tier', price: '$499+', description: 'High-value package' }
-      ]
-    };
+    if (availableCompetitors.length === 0) {
+      return null;
+    }
 
-    const revenueModel = revenueModels[0] || 'default';
-    const products = productTemplates[revenueModel] || productTemplates['default'];
-
-    // Strengths and weaknesses pools
-    const strengthsPool = [
-      'Established brand recognition',
-      'Large customer base',
-      'Strong online presence',
-      'Competitive pricing',
-      'Wide product range',
-      'Excellent customer service',
-      'Strong partnerships',
-      'Innovative technology',
-      'Efficient operations',
-      'Quality reputation',
-      'Strong marketing',
-      'Financial stability',
-      'Experienced team',
-      'Loyal customers',
-      'Good reviews'
-    ];
-
-    const weaknessesPool = [
-      'Slow to innovate',
-      'Higher prices',
-      'Limited customization',
-      'Poor mobile experience',
-      'Outdated technology',
-      'Limited support hours',
-      'Complex onboarding',
-      'Long contracts required',
-      'Limited integrations',
-      'Slow response times',
-      'Generic solutions',
-      'Hidden fees',
-      'Rigid policies',
-      'Limited scalability'
-    ];
-
-    const getRandomItems = (arr: string[], count: number): string[] => {
-      const shuffled = [...arr].sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, count);
-    };
+    const template = availableCompetitors[Math.floor(Math.random() * availableCompetitors.length)];
 
     const pricing: 'higher' | 'lower' | 'similar' = ['higher', 'lower', 'similar'][Math.floor(Math.random() * 3)] as any;
     const marketShare: 'larger' | 'smaller' | 'similar' = stage === 'Idea Stage' || stage === 'Startup (0-1 years)'
@@ -190,21 +249,27 @@ const Resources: React.FC = () => {
 
     return {
       id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: compName,
-      description: `A ${marketShare === 'larger' ? 'major' : marketShare === 'smaller' ? 'emerging' : 'comparable'} player in the ${industry} space offering ${revenueModel.toLowerCase()} solutions.`,
-      website: `www.${compName.toLowerCase().replace(/\s+/g, '')}.com`,
-      industry: industry,
-      products: products.map(p => ({
-        ...p,
-        price: pricing === 'higher' ? p.price.replace(/\$(\d+)/g, (_, n) => `$${Math.round(parseInt(n) * 1.2)}`)
-             : pricing === 'lower' ? p.price.replace(/\$(\d+)/g, (_, n) => `$${Math.round(parseInt(n) * 0.8)}`)
-             : p.price
-      })),
-      strengths: getRandomItems(strengthsPool, 3),
-      weaknesses: getRandomItems(weaknessesPool, 2),
+      name: template.name,
+      description: template.description,
+      website: template.website,
+      industry: category.keywords[0],
+      products: template.products,
+      strengths: template.strengths,
+      weaknesses: template.weaknesses,
       comparison: { pricing, marketShare, features },
       threatLevel
     };
+  };
+
+  // Check if matches exist for this business
+  const checkForMatches = (): boolean => {
+    const { category, matchScore } = analyzeBusinessType();
+    if (!category || matchScore < 1) {
+      return false;
+    }
+    const usedNames = competitors.map(c => c.name);
+    const availableCompetitors = category.competitors.filter(c => !usedNames.includes(c.name));
+    return availableCompetitors.length > 0;
   };
 
   const handleGenerateCompetitors = async (count: number) => {
@@ -212,19 +277,42 @@ const Resources: React.FC = () => {
       alert('Please complete your Business Plan first to generate relevant competitors.');
       return;
     }
+
+    const { category, matchScore, matchedKeywords } = analyzeBusinessType();
+
+    if (!category || matchScore < 1) {
+      setNoMatchesFound(true);
+      setMatchedCategory('');
+      return;
+    }
+
+    setMatchedCategory(matchedKeywords.join(', '));
+    setNoMatchesFound(false);
+
     if (competitors.length + count > 10) {
       alert(`You can only have up to 10 competitors. You have ${competitors.length} currently.`);
       return;
     }
 
-    setIsGenerating(true);
-    setGeneratingCount(count);
+    const usedNames = competitors.map(c => c.name);
+    const availableCount = category.competitors.filter(c => !usedNames.includes(c.name)).length;
 
-    // Simulate AI generation with delays
-    for (let i = 0; i < count; i++) {
+    if (availableCount === 0) {
+      alert('All available competitors for your business type have been added.');
+      return;
+    }
+
+    const actualCount = Math.min(count, availableCount);
+
+    setIsGenerating(true);
+    setGeneratingCount(actualCount);
+
+    for (let i = 0; i < actualCount; i++) {
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
       const newCompetitor = generateCompetitor();
-      setCompetitors(prev => [...prev, newCompetitor]);
+      if (newCompetitor) {
+        setCompetitors(prev => [...prev, newCompetitor]);
+      }
       setGeneratingCount(prev => prev - 1);
     }
 
@@ -251,8 +339,10 @@ const Resources: React.FC = () => {
     setIsGenerating(true);
     await new Promise(resolve => setTimeout(resolve, 800));
     const newCompetitor = generateCompetitor();
-    newCompetitor.id = id; // Keep same ID
-    setCompetitors(prev => prev.map(c => c.id === id ? newCompetitor : c));
+    if (newCompetitor) {
+      newCompetitor.id = id; // Keep same ID
+      setCompetitors(prev => prev.map(c => c.id === id ? newCompetitor : c));
+    }
     setIsGenerating(false);
   };
 
@@ -812,6 +902,14 @@ const Resources: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Show matched category when competitors exist */}
+                {matchedCategory && competitors.length > 0 && (
+                  <div className="matched-category-info">
+                    <Sparkles size={16} />
+                    <span>Matched business type: <strong>{matchedCategory}</strong></span>
+                  </div>
+                )}
+
                 {isGenerating && generatingCount > 0 && (
                   <div className="generating-status">
                     <Loader size={20} className="spinning" />
@@ -819,7 +917,36 @@ const Resources: React.FC = () => {
                   </div>
                 )}
 
-                {competitors.length === 0 && !isGenerating && (
+                {/* No matches found state */}
+                {noMatchesFound && !isGenerating && (
+                  <div className="no-matches-found">
+                    <div className="no-matches-icon">
+                      <Search size={48} />
+                    </div>
+                    <h4>No Close Matches Found</h4>
+                    <p>
+                      We couldn't find competitors that closely match your specific business type.
+                      This could mean you're in a unique niche market with limited direct competition,
+                      which can be an advantage!
+                    </p>
+                    <div className="no-matches-suggestions">
+                      <h5>Suggestions:</h5>
+                      <ul>
+                        <li>Update your business plan with more industry keywords</li>
+                        <li>Research indirect competitors in adjacent markets</li>
+                        <li>Consider your unique positioning as a competitive advantage</li>
+                      </ul>
+                    </div>
+                    <button
+                      className="reset-search-btn"
+                      onClick={() => setNoMatchesFound(false)}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {competitors.length === 0 && !isGenerating && !noMatchesFound && (
                   <div className="no-competitors">
                     <Building2 size={48} />
                     <h4>No Competitors Yet</h4>

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calculator, DollarSign, Percent, TrendingUp, Users, BarChart3, CreditCard, Clock, UserPlus, Building, Tag, PieChart, Target, Grid, Flag, ArrowRight, HelpCircle, Search, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface CalculatorResult {
   label: string;
@@ -19,6 +20,7 @@ interface CalculatorInfo {
 }
 
 const Calculators: React.FC = () => {
+  const { user } = useAuth();
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
   const [results, setResults] = useState<CalculatorResult[]>([]);
   const [showFinder, setShowFinder] = useState(false);
@@ -27,6 +29,37 @@ const Calculators: React.FC = () => {
 
   // Generic state for all calculators
   const [inputs, setInputs] = useState<{[key: string]: string}>({});
+
+  // Load saved calculator inputs from localStorage
+  useEffect(() => {
+    if (!user) return;
+    const saved = localStorage.getItem(`expedium_calc_inputs_${user.id}`);
+    if (saved) {
+      try { setInputs(JSON.parse(saved)); } catch {}
+    }
+    const savedResults = localStorage.getItem(`expedium_calc_results_${user.id}`);
+    if (savedResults) {
+      try {
+        const parsed = JSON.parse(savedResults);
+        if (parsed.calcId && parsed.results) {
+          setActiveCalc(parsed.calcId);
+          setResults(parsed.results);
+        }
+      } catch {}
+    }
+  }, [user]);
+
+  // Save inputs to localStorage when they change
+  useEffect(() => {
+    if (!user || Object.keys(inputs).length === 0) return;
+    localStorage.setItem(`expedium_calc_inputs_${user.id}`, JSON.stringify(inputs));
+  }, [inputs, user]);
+
+  // Save results to localStorage when they change
+  useEffect(() => {
+    if (!user || !activeCalc || results.length === 0) return;
+    localStorage.setItem(`expedium_calc_results_${user.id}`, JSON.stringify({ calcId: activeCalc, results }));
+  }, [results, activeCalc, user]);
 
   const updateInput = (key: string, value: string) => {
     setInputs(prev => ({ ...prev, [key]: value }));

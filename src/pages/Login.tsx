@@ -5,7 +5,7 @@ import { validatePasswordStrength, validateEmail } from '../utils/security';
 import {
   Zap, Mail, Lock, User, Building, ArrowRight, CheckCircle,
   BarChart3, Users, Calculator, FileText, Target, TrendingUp,
-  Shield, Clock, Star, Quote, AlertCircle
+  Shield, Clock, AlertCircle
 } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -101,7 +101,7 @@ const Login: React.FC = () => {
     {
       icon: FileText,
       title: 'Business Planning',
-      description: 'AI-powered guidance to build your perfect business model'
+      description: 'Guided surveys to define your goals, market, and model'
     },
     {
       icon: Calculator,
@@ -125,28 +125,25 @@ const Login: React.FC = () => {
     }
   ];
 
-  const testimonials = [
+  const highlights = [
     {
-      quote: "Expedium helped me organize my entire business in one place. The calculators alone saved me hours of work.",
-      author: "Sarah M.",
-      role: "Freelance Designer"
+      title: 'All-in-One Platform',
+      description: 'Plan, track finances, manage customers, and run marketing from a single dashboard.'
     },
     {
-      quote: "Finally, a tool that understands what small business owners actually need. Simple yet powerful.",
-      author: "James K.",
-      role: "E-commerce Owner"
+      title: 'No Account Fees',
+      description: 'Every feature is free. Your data stays in your browser, private and secure.'
     },
     {
-      quote: "The customer management features transformed how I handle client relationships.",
-      author: "Maria L.",
-      role: "Consultant"
+      title: 'Built for Small Business',
+      description: 'Designed for solopreneurs and small teams who need practical tools, not complexity.'
     }
   ];
 
   const stats = [
-    { value: '10K+', label: 'Businesses Streamlined' },
-    { value: '50+', label: 'Tools & Features' },
-    { value: '4.9', label: 'User Rating' },
+    { value: '14+', label: 'Financial Calculators' },
+    { value: '4', label: 'Business Phases' },
+    { value: '10+', label: 'Management Tools' },
     { value: '100%', label: 'Free to Use' }
   ];
 
@@ -189,22 +186,14 @@ const Login: React.FC = () => {
             ))}
           </div>
 
-          {/* Testimonials */}
+          {/* Highlights */}
           <div className="testimonials-section">
-            <h2><Quote size={20} /> What Our Users Say</h2>
+            <h2>Why Expedium?</h2>
             <div className="testimonials-grid">
-              {testimonials.map((testimonial, idx) => (
+              {highlights.map((item, idx) => (
                 <div key={idx} className="testimonial-card">
-                  <div className="stars">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
-                    ))}
-                  </div>
-                  <p>"{testimonial.quote}"</p>
-                  <div className="testimonial-author">
-                    <strong>{testimonial.author}</strong>
-                    <span>{testimonial.role}</span>
-                  </div>
+                  <h3 style={{ margin: '0 0 8px', fontSize: '1rem' }}>{item.title}</h3>
+                  <p style={{ margin: 0 }}>{item.description}</p>
                 </div>
               ))}
             </div>

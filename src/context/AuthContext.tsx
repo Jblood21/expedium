@@ -58,6 +58,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(storedUser);
         // Update session activity
         secureStorage.setItem('expedium_session', updateSessionActivity(session));
+        // Restore dark mode preference
+        if (localStorage.getItem('expedium_darkMode') === 'true') {
+          document.body.classList.add('dark-mode');
+        }
       } else if (storedUser) {
         // Session expired, clear user
         secureStorage.removeItem('expedium_user');
@@ -141,6 +145,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userWithoutPassword);
       secureStorage.setItem('expedium_user', userWithoutPassword);
       secureStorage.setItem('expedium_session', createSession(foundUser.id));
+
+      // Restore dark mode preference after login
+      if (localStorage.getItem('expedium_darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
 
       return { success: true, message: 'Login successful' };
     }

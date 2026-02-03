@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Session expired, clear user
         secureStorage.removeItem('expedium_user');
         secureStorage.removeItem('expedium_session');
+        document.body.classList.remove('dark-mode');
       }
       setIsLoading(false);
     };
@@ -94,25 +95,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Verify password - support both old (plain) and new (hashed) passwords
     let passwordValid = false;
+    let needsMigration = false;
 
-    // Check if it's an old plain-text password (for migration)
-    if (foundUser.passwordHash && !foundUser.passwordHash.includes('-')) {
-      // New hashed password
+    if (foundUser.passwordHash && foundUser.passwordHash.length === 64 && /^[0-9a-f]+$/.test(foundUser.passwordHash)) {
+      // Properly hashed password (64-char hex SHA-256)
       passwordValid = await verifyPassword(password, foundUser.passwordHash);
-    } else if ((foundUser as unknown as { password?: string }).password) {
-      // Old plain-text password - verify and migrate
+    } else if (foundUser.passwordHash) {
+      // passwordHash field exists but isn't a valid hash — treat as plain text
+      if (foundUser.passwordHash === password) {
+        passwordValid = true;
+        needsMigration = true;
+      }
+    }
+
+    // Fallback: check old 'password' field for pre-security users
+    if (!passwordValid && (foundUser as unknown as { password?: string }).password) {
       const oldPassword = (foundUser as unknown as { password: string }).password;
       if (oldPassword === password) {
         passwordValid = true;
-        // Migrate to hashed password
-        const newHash = await hashPassword(password);
-        const updatedUsers = users.map((u: StoredUser) =>
-          u.email === normalizedEmail
-            ? { ...u, passwordHash: newHash, password: undefined }
-            : u
-        );
-        secureStorage.setItem('expedium_users', updatedUsers);
+        needsMigration = true;
       }
+    }
+
+    // Migrate plain-text password to hash
+    if (passwordValid && needsMigration) {
+      const newHash = await hashPassword(password);
+      const updatedUsers = users.map((u: StoredUser) =>
+        u.email === normalizedEmail
+          ? { ...u, passwordHash: newHash, password: undefined }
+          : u
+      );
+      secureStorage.setItem('expedium_users', updatedUsers);
     }
 
     if (passwordValid) {
@@ -191,6 +204,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     secureStorage.removeItem('expedium_user');
     secureStorage.removeItem('expedium_session');
+    // Clean up dark mode so login page renders correctly
+    document.body.classList.remove('dark-mode');
   };
 
   return (

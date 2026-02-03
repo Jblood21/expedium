@@ -5,7 +5,8 @@ import {
   LayoutDashboard, TrendingUp, Users, Target, DollarSign,
   CheckCircle, Zap, BarChart3, Calculator,
   FileText, Lightbulb, ArrowRight, BookOpen, Megaphone,
-  ChevronRight, ChevronDown, Star, Shield, Hammer, User
+  ChevronRight, ChevronDown, Star, Shield, Hammer, User,
+  Clock
 } from 'lucide-react';
 import { BusinessPlanAnswers } from '../types';
 import { getPhaseProgress, getPhases } from '../utils/phaseTracker';
@@ -61,66 +62,68 @@ const Dashboard: React.FC = () => {
     setExpandedPhase(expandedPhase === phaseId ? null : phaseId);
   };
 
-  // Welcome screen before business plan
+  /* ── Welcome screen (before business plan) ── */
   if (!planCompleted) {
     return (
       <div className="db-page">
         <div className="db-welcome">
-          <div className="db-welcome-icon">
-            <Zap size={48} />
+          <div className="db-welcome-badge">
+            <Zap size={32} />
           </div>
-          <h1>Welcome to Expedium, {user?.name}!</h1>
-          <p className="db-welcome-subtitle">Your guided journey through building a successful business.</p>
+          <h1>Welcome, {user?.name}</h1>
+          <p className="db-welcome-sub">
+            Let's build your personalized business roadmap.
+          </p>
 
-          <div className="db-welcome-phases">
-            <h3>Your Business Journey</h3>
-            <div className="db-phase-preview-row">
+          <div className="db-journey-preview">
+            <div className="db-journey-label">Your 4-Phase Journey</div>
+            <div className="db-journey-steps">
               {getPhases().map((phase, i) => {
                 const PhaseIcon = getIcon(phase.iconName);
                 return (
                   <React.Fragment key={phase.id}>
-                    <div className="db-phase-preview">
-                      <div className="db-phase-preview-icon">
-                        <PhaseIcon size={20} />
+                    <div className="db-journey-step">
+                      <div className="db-journey-icon">
+                        <PhaseIcon size={18} />
                       </div>
-                      <span className="db-phase-preview-num">Phase {i + 1}</span>
-                      <span className="db-phase-preview-name">{phase.name}</span>
+                      <span className="db-journey-num">Phase {i + 1}</span>
+                      <span className="db-journey-name">{phase.name}</span>
                     </div>
-                    {i < 3 && <div className="db-phase-preview-line" />}
+                    {i < 3 && <div className="db-journey-connector" />}
                   </React.Fragment>
                 );
               })}
             </div>
           </div>
 
-          <div className="db-welcome-steps">
-            <div className="db-welcome-step">
-              <div className="db-step-num">1</div>
+          <div className="db-onboard">
+            <div className="db-onboard-step">
+              <div className="db-onboard-num">1</div>
               <div>
                 <h4>Tell Us About Your Business</h4>
                 <p>Answer a few questions about your goals and challenges.</p>
               </div>
             </div>
-            <div className="db-welcome-step">
-              <div className="db-step-num">2</div>
+            <div className="db-onboard-step">
+              <div className="db-onboard-num">2</div>
               <div>
                 <h4>Get Your Personalized Roadmap</h4>
                 <p>We'll create a 4-phase journey tailored to your needs.</p>
               </div>
             </div>
-            <div className="db-welcome-step">
-              <div className="db-step-num">3</div>
+            <div className="db-onboard-step">
+              <div className="db-onboard-num">3</div>
               <div>
-                <h4>Build & Grow Step by Step</h4>
+                <h4>Build &amp; Grow Step by Step</h4>
                 <p>Follow your roadmap from foundation to optimization.</p>
               </div>
             </div>
           </div>
 
-          <button className="db-start-btn" onClick={() => navigate('/business-plan')}>
-            <Lightbulb size={22} />
+          <button className="db-cta" onClick={() => navigate('/business-plan')}>
+            <Lightbulb size={20} />
             Start Your Business Profile
-            <ArrowRight size={18} />
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -129,110 +132,146 @@ const Dashboard: React.FC = () => {
 
   if (!progress) return null;
 
+  /* ── Main dashboard ── */
   return (
     <div className="db-page">
-      {/* Header */}
-      <div className="db-header">
-        <div className="db-header-info">
-          <h1><LayoutDashboard size={26} /> Your Business Journey</h1>
-          <p>{answers.business_name || 'Your Business'} &middot; {answers.business_stage || 'Getting Started'}</p>
-        </div>
-        <div className="db-header-progress">
-          <div className="db-progress-stats">
-            <span className="db-progress-pct">{progress.overallPercent}%</span>
-            <span className="db-progress-label">{progress.completedTasks} of {progress.totalTasks} tasks</span>
+      {/* Page Header */}
+      <div className="db-page-header">
+        <LayoutDashboard size={28} />
+        <h1>Your Business Journey</h1>
+        <p>{answers.business_name || 'Your Business'} &middot; {answers.business_stage || 'Getting Started'}</p>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="db-stats">
+        <div className="db-stat db-stat--primary">
+          <div className="db-stat-icon">
+            <TrendingUp size={22} />
           </div>
-          <div className="db-progress-track">
-            <div className="db-progress-fill" style={{ width: `${progress.overallPercent}%` }} />
+          <div className="db-stat-body">
+            <span className="db-stat-label">Overall Progress</span>
+            <span className="db-stat-value">{progress.overallPercent}%</span>
+          </div>
+          <div className="db-stat-bar">
+            <div className="db-stat-bar-fill" style={{ width: `${progress.overallPercent}%` }} />
+          </div>
+        </div>
+        <div className="db-stat">
+          <div className="db-stat-icon db-stat-icon--success">
+            <CheckCircle size={22} />
+          </div>
+          <div className="db-stat-body">
+            <span className="db-stat-label">Completed</span>
+            <span className="db-stat-value">
+              {progress.completedTasks}
+              <span className="db-stat-muted"> / {progress.totalTasks}</span>
+            </span>
+          </div>
+        </div>
+        <div className="db-stat">
+          <div className="db-stat-icon db-stat-icon--warning">
+            <Clock size={22} />
+          </div>
+          <div className="db-stat-body">
+            <span className="db-stat-label">Current Phase</span>
+            <span className="db-stat-value">
+              {progress.phaseStatuses[progress.currentPhaseIndex].phase.name}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Phase Roadmap */}
-      <div className="db-roadmap">
+      {/* Phase Stepper */}
+      <div className="db-stepper">
         {progress.phaseStatuses.map((ps, index) => {
           const PhaseIcon = getIcon(ps.phase.iconName);
           const status = ps.isComplete ? 'done' : ps.isCurrent ? 'active' : 'upcoming';
           return (
             <React.Fragment key={ps.phase.id}>
-              <button className={`db-roadmap-node db-roadmap-node--${status}`} onClick={() => togglePhase(ps.phase.id)}>
-                <div className="db-roadmap-circle">
-                  {ps.isComplete ? <CheckCircle size={20} /> : <PhaseIcon size={20} />}
+              <button
+                className={`db-step db-step--${status}`}
+                onClick={() => togglePhase(ps.phase.id)}
+              >
+                <div className="db-step-circle">
+                  {ps.isComplete ? <CheckCircle size={18} /> : <PhaseIcon size={18} />}
                 </div>
-                <span className="db-roadmap-name">{ps.phase.name}</span>
-                <span className="db-roadmap-count">{ps.completedTasks}/{ps.totalTasks}</span>
+                <span className="db-step-name">{ps.phase.name}</span>
+                <span className="db-step-count">{ps.completedTasks}/{ps.totalTasks}</span>
               </button>
               {index < progress.phaseStatuses.length - 1 && (
-                <div className={`db-roadmap-line ${ps.isComplete ? 'db-roadmap-line--done' : ''}`} />
+                <div className={`db-step-line ${ps.isComplete ? 'db-step-line--done' : ''}`} />
               )}
             </React.Fragment>
           );
         })}
       </div>
 
-      {/* Phase Cards */}
-      <div className="db-phases">
+      {/* Phase Sections */}
+      <div className="db-sections">
         {progress.phaseStatuses.map((ps, phaseIndex) => {
           const isOpen = expandedPhase === ps.phase.id;
           const PhaseIcon = getIcon(ps.phase.iconName);
           const status = ps.isComplete ? 'done' : ps.isCurrent ? 'active' : 'upcoming';
 
           return (
-            <div key={ps.phase.id} className={`db-phase db-phase--${status}`}>
-              <button className="db-phase-header" onClick={() => togglePhase(ps.phase.id)}>
-                <div className="db-phase-badge-wrap">
-                  <div className={`db-phase-badge db-phase-badge--${status}`}>
+            <div key={ps.phase.id} className={`db-section db-section--${status}`}>
+              <button className="db-section-toggle" onClick={() => togglePhase(ps.phase.id)}>
+                <div className="db-section-left">
+                  <div className={`db-section-badge db-section-badge--${status}`}>
                     {ps.isComplete ? <CheckCircle size={18} /> : <PhaseIcon size={18} />}
                   </div>
-                  <div className="db-phase-titles">
+                  <div className="db-section-info">
                     <h2>
-                      <span className="db-phase-num">Phase {phaseIndex + 1}:</span> {ps.phase.name}
-                      <span className="db-phase-sub"> &mdash; {ps.phase.subtitle}</span>
+                      <span className="db-section-num">Phase {phaseIndex + 1}:</span>{' '}
+                      {ps.phase.name}
+                      <span className="db-section-sub"> &mdash; {ps.phase.subtitle}</span>
                     </h2>
                     <p>{ps.phase.description}</p>
                   </div>
                 </div>
-                <div className="db-phase-meta">
-                  <span className="db-phase-count">{ps.completedTasks}/{ps.totalTasks}</span>
-                  <div className="db-phase-dots">
+                <div className="db-section-right">
+                  <span className="db-section-count">{ps.completedTasks}/{ps.totalTasks}</span>
+                  <div className="db-section-dots">
                     {ps.phase.tasks.map((task) => (
                       <div
                         key={task.id}
-                        className={`db-phase-dot ${user && task.checkComplete(user.id) ? 'db-phase-dot--done' : ''}`}
+                        className={`db-dot ${user && task.checkComplete(user.id) ? 'db-dot--done' : ''}`}
                       />
                     ))}
                   </div>
-                  {isOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                 </div>
               </button>
 
               {isOpen && (
-                <div className="db-tasks">
+                <div className="db-cards">
                   {ps.phase.tasks.map((task, taskIndex) => {
                     const isDone = user ? task.checkComplete(user.id) : false;
                     const TaskIcon = getIcon(task.iconName);
                     return (
-                      <div key={task.id} className={`db-task ${isDone ? 'db-task--done' : ''}`}>
-                        <div className="db-task-top">
-                          <div className="db-task-step">{taskIndex + 1}</div>
-                          {isDone && <CheckCircle size={16} className="db-task-check" />}
-                        </div>
-                        <div className="db-task-icon">
-                          <TaskIcon size={26} />
+                      <div key={task.id} className={`db-card ${isDone ? 'db-card--done' : ''}`}>
+                        <div className="db-card-top">
+                          <div className={`db-card-icon ${isDone ? 'db-card-icon--done' : ''}`}>
+                            <TaskIcon size={20} />
+                          </div>
+                          {isDone && <CheckCircle size={16} className="db-card-check" />}
                         </div>
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
-                        <div className="db-task-actions">
+                        <div className="db-card-actions">
                           {isDone ? (
-                            <Link to={task.path} className="db-task-btn db-task-btn--review">
+                            <Link to={task.path} className="db-btn db-btn--review">
                               Review <ChevronRight size={14} />
                             </Link>
                           ) : (
                             <>
-                              <Link to={task.path} className="db-task-btn db-task-btn--go">
+                              <Link to={task.path} className="db-btn db-btn--go">
                                 Start <ArrowRight size={14} />
                               </Link>
-                              <button className="db-task-btn db-task-btn--mark" onClick={() => markStepComplete(task.id)}>
+                              <button
+                                className="db-btn db-btn--mark"
+                                onClick={() => markStepComplete(task.id)}
+                              >
                                 <CheckCircle size={14} /> Done
                               </button>
                             </>
@@ -250,26 +289,28 @@ const Dashboard: React.FC = () => {
 
       {/* Business Profile */}
       <div className="db-profile">
-        <div className="db-profile-head">
-          <h3><Star size={18} /> Your Business Profile</h3>
-          <Link to="/business-plan" className="db-profile-edit">Edit Profile</Link>
+        <div className="db-profile-top">
+          <h3><Star size={16} /> Business Profile</h3>
+          <Link to="/business-plan" className="db-profile-link">Edit Profile</Link>
         </div>
         <div className="db-profile-grid">
           <div className="db-profile-item">
             <span className="db-profile-label">Business</span>
-            <span className="db-profile-value">{answers.business_name || 'Not set'}</span>
+            <span className="db-profile-val">{answers.business_name || 'Not set'}</span>
           </div>
           <div className="db-profile-item">
             <span className="db-profile-label">Industry</span>
-            <span className="db-profile-value">{Array.isArray(answers.industry) ? answers.industry.slice(0, 2).join(', ') : 'Not set'}</span>
+            <span className="db-profile-val">
+              {Array.isArray(answers.industry) ? answers.industry.slice(0, 2).join(', ') : 'Not set'}
+            </span>
           </div>
           <div className="db-profile-item">
             <span className="db-profile-label">Stage</span>
-            <span className="db-profile-value">{answers.business_stage || 'Not set'}</span>
+            <span className="db-profile-val">{answers.business_stage || 'Not set'}</span>
           </div>
           <div className="db-profile-item">
             <span className="db-profile-label">Revenue</span>
-            <span className="db-profile-value">{answers.current_revenue || 'Not set'}</span>
+            <span className="db-profile-val">{answers.current_revenue || 'Not set'}</span>
           </div>
         </div>
       </div>

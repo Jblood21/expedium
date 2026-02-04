@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Trash2, Edit2, Save, X,
   Calendar, Tag, PieChart, BarChart3, ArrowUpRight, ArrowDownRight,
-  Download, Filter, Search
+  Download, Search, Wallet, AlertTriangle, CheckCircle, RefreshCw,
+  Percent, ArrowRight, Heart
 } from 'lucide-react';
 
 interface Transaction {
@@ -21,7 +22,17 @@ interface Budget {
   category: string;
   budgeted: number;
   spent: number;
+  isCustom?: boolean;
 }
+
+const PRESET_CATEGORIES = [
+  'Rent', 'Utilities', 'Payroll', 'Marketing', 'Software',
+  'Supplies', 'Insurance', 'Travel', 'Meals', 'Professional Services',
+  'Equipment', 'Subscriptions', 'Phone & Internet', 'Office', 'Other'
+];
+
+const incomeCategories = ['Sales', 'Services', 'Consulting', 'Investments', 'Refunds', 'Other Income'];
+const expenseCategories = ['Rent', 'Utilities', 'Payroll', 'Marketing', 'Software', 'Supplies', 'Insurance', 'Travel', 'Meals', 'Professional Services', 'Equipment', 'Subscriptions', 'Phone & Internet', 'Office', 'Other'];
 
 const Finances: React.FC = () => {
   const { user } = useAuth();
@@ -33,6 +44,8 @@ const Finances: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterMonth, setFilterMonth] = useState(new Date().toISOString().slice(0, 7));
   const [searchTerm, setSearchTerm] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
 
   const [transactionForm, setTransactionForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -42,9 +55,6 @@ const Finances: React.FC = () => {
     category: '',
     recurring: false
   });
-
-  const incomeCategories = ['Sales', 'Services', 'Consulting', 'Investments', 'Refunds', 'Other Income'];
-  const expenseCategories = ['Rent', 'Utilities', 'Payroll', 'Marketing', 'Software', 'Supplies', 'Insurance', 'Travel', 'Meals', 'Professional Services', 'Equipment', 'Other'];
 
   useEffect(() => {
     const savedTransactions = localStorage.getItem(`expedium_transactions_${user?.id}`);
@@ -56,16 +66,8 @@ const Finances: React.FC = () => {
 
     if (savedBudgets) {
       setBudgets(JSON.parse(savedBudgets));
-    } else {
-      // Initialize default budgets
-      const defaultBudgets: Budget[] = expenseCategories.map(cat => ({
-        id: cat.toLowerCase().replace(' ', '-'),
-        category: cat,
-        budgeted: 0,
-        spent: 0
-      }));
-      setBudgets(defaultBudgets);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const saveTransactions = (newTransactions: Transaction[]) => {
@@ -82,13 +84,27 @@ const Finances: React.FC = () => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   };
 
-  // Calculate summaries
+  // ── Calculations ──
   const currentMonthTransactions = transactions.filter(t => t.date.startsWith(filterMonth));
   const totalIncome = currentMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = currentMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
   const netCashFlow = totalIncome - totalExpenses;
 
-  // Calculate expense breakdown by category
+  // Last month comparison
+  const lastMonthDate = new Date(filterMonth + '-01');
+  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+  const lastMonthKey = lastMonthDate.toISOString().slice(0, 7);
+  const lastMonthTransactions = transactions.filter(t => t.date.startsWith(lastMonthKey));
+  const lastMonthIncome = lastMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const lastMonthExpenses = lastMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+  const incomeChange = lastMonthIncome > 0 ? ((totalIncome - lastMonthIncome) / lastMonthIncome) * 100 : 0;
+  const expenseChange = lastMonthExpenses > 0 ? ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100 : 0;
+
+  // Savings rate
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+
+  // Expense breakdown
   const expensesByCategory = currentMonthTransactions
     .filter(t => t.type === 'expense')
     .reduce((acc, t) => {
@@ -96,12 +112,49 @@ const Finances: React.FC = () => {
       return acc;
     }, {} as Record<string, number>);
 
-  // Calculate budget progress
+  // Budget progress
   const budgetsWithSpent = budgets.map(b => ({
     ...b,
     spent: expensesByCategory[b.category] || 0
   }));
 
+  const totalBudgeted = budgets.reduce((sum, b) => sum + b.budgeted, 0);
+
+  // Upcoming recurring expenses
+  const recurringExpenses = transactions
+    .filter(t => t.recurring && t.type === 'expense')
+    .reduce((acc, t) => {
+      if (!acc.find(a => a.description === t.description && a.category === t.category)) {
+        acc.push(t);
+      }
+      return acc;
+    }, [] as Transaction[]);
+
+  const unpaidRecurring = recurringExpenses.filter(recurring => {
+    return !currentMonthTransactions.some(
+      t => t.description === recurring.description && t.category === recurring.category
+    );
+  });
+
+  // Monthly trends
+  const monthlyTrends = [];
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const monthKey = date.toISOString().slice(0, 7);
+    const monthTransactions = transactions.filter(t => t.date.startsWith(monthKey));
+    const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expenses = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    monthlyTrends.push({
+      month: date.toLocaleDateString('en-US', { month: 'short' }),
+      income,
+      expenses,
+      net: income - expenses
+    });
+  }
+  const maxTrendValue = Math.max(...monthlyTrends.flatMap(m => [m.income, m.expenses])) || 1;
+
+  // ── Handlers ──
   const saveTransaction = () => {
     const newTransaction: Transaction = {
       id: editingTransaction?.id || Date.now().toString(),
@@ -154,11 +207,46 @@ const Finances: React.FC = () => {
     }
   };
 
-  const updateBudget = (category: string, amount: number) => {
-    const newBudgets = budgets.map(b =>
+  // Budget handlers
+  const toggleBudgetCategory = (category: string) => {
+    const exists = budgets.find(b => b.category === category);
+    if (exists) {
+      saveBudgets(budgets.filter(b => b.category !== category));
+    } else {
+      saveBudgets([...budgets, {
+        id: category.toLowerCase().replace(/\s+/g, '-'),
+        category,
+        budgeted: 0,
+        spent: 0,
+        isCustom: false
+      }]);
+    }
+  };
+
+  const addCustomCategory = () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    if (budgets.find(b => b.category.toLowerCase() === name.toLowerCase())) return;
+
+    saveBudgets([...budgets, {
+      id: 'custom-' + Date.now(),
+      category: name,
+      budgeted: 0,
+      spent: 0,
+      isCustom: true
+    }]);
+    setNewCategoryName('');
+    setShowCategoryInput(false);
+  };
+
+  const removeBudgetCategory = (category: string) => {
+    saveBudgets(budgets.filter(b => b.category !== category));
+  };
+
+  const updateBudgetAmount = (category: string, amount: number) => {
+    saveBudgets(budgets.map(b =>
       b.category === category ? { ...b, budgeted: amount } : b
-    );
-    saveBudgets(newBudgets);
+    ));
   };
 
   const filteredTransactions = currentMonthTransactions
@@ -166,25 +254,6 @@ const Finances: React.FC = () => {
     .filter(t => t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                  t.category.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  // Calculate monthly trends (last 6 months)
-  const monthlyTrends = [];
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const monthKey = date.toISOString().slice(0, 7);
-    const monthTransactions = transactions.filter(t => t.date.startsWith(monthKey));
-    const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const expenses = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-    monthlyTrends.push({
-      month: date.toLocaleDateString('en-US', { month: 'short' }),
-      income,
-      expenses,
-      net: income - expenses
-    });
-  }
-
-  const maxTrendValue = Math.max(...monthlyTrends.flatMap(m => [m.income, m.expenses])) || 1;
 
   const exportToCSV = () => {
     const headers = ['Date', 'Description', 'Type', 'Category', 'Amount'];
@@ -198,12 +267,28 @@ const Finances: React.FC = () => {
     a.click();
   };
 
+  // Active budget categories (for display in the category chips)
+  const activeBudgetCategories = new Set(budgets.map(b => b.category));
+
+  // All categories including custom ones (for transaction form)
+  const allExpenseCategories = Array.from(new Set([...expenseCategories, ...budgets.filter(b => b.isCustom).map(b => b.category)]));
+
   return (
     <div className="finances-page">
       <div className="page-header">
         <DollarSign size={32} />
         <h1>Financial Tracking</h1>
-        <p>Track income, expenses, and manage your budget</p>
+        <p>See where your money goes and plan your spending</p>
+      </div>
+
+      {/* Month Picker */}
+      <div className="fin-month-picker">
+        <Calendar size={16} />
+        <input
+          type="month"
+          value={filterMonth}
+          onChange={(e) => setFilterMonth(e.target.value)}
+        />
       </div>
 
       {/* Tabs */}
@@ -215,50 +300,159 @@ const Finances: React.FC = () => {
           <BarChart3 size={18} /> Transactions
         </button>
         <button className={`tab-btn ${activeTab === 'budget' ? 'active' : ''}`} onClick={() => setActiveTab('budget')}>
-          <Tag size={18} /> Budget
+          <Wallet size={18} /> Budget
         </button>
       </div>
 
-      {/* Overview Tab */}
+      {/* ════ Overview Tab ════ */}
       {activeTab === 'overview' && (
         <div className="overview-section">
+          {/* Financial Health */}
+          <div className="fin-health">
+            <div className="fin-health-card">
+              <div className="fin-health-icon">
+                <Heart size={20} />
+              </div>
+              <div className="fin-health-body">
+                <span className="fin-health-label">Savings Rate</span>
+                {totalIncome > 0 ? (
+                  <>
+                    <span className={`fin-health-value ${savingsRate >= 20 ? 'good' : savingsRate >= 0 ? 'warning' : 'bad'}`}>
+                      {savingsRate.toFixed(0)}%
+                    </span>
+                    <span className="fin-health-hint">
+                      {savingsRate >= 20
+                        ? "You're keeping more than you spend"
+                        : savingsRate >= 0
+                        ? 'Try to save at least 20% of what you earn'
+                        : "You're spending more than you earn"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="fin-health-hint">Add income to see how much you're saving</span>
+                )}
+              </div>
+            </div>
+
+            <div className="fin-health-card">
+              <div className="fin-health-icon fin-health-icon--income">
+                <TrendingUp size={20} />
+              </div>
+              <div className="fin-health-body">
+                <span className="fin-health-label">Income vs Last Month</span>
+                {lastMonthIncome > 0 ? (
+                  <>
+                    <span className={`fin-health-value ${incomeChange >= 0 ? 'good' : 'bad'}`}>
+                      {incomeChange >= 0 ? '+' : ''}{incomeChange.toFixed(0)}%
+                    </span>
+                    <span className="fin-health-hint">
+                      {incomeChange >= 0
+                        ? `You earned ${formatCurrency(totalIncome - lastMonthIncome)} more`
+                        : `You earned ${formatCurrency(lastMonthIncome - totalIncome)} less`}
+                    </span>
+                  </>
+                ) : (
+                  <span className="fin-health-hint">Add last month's income to compare</span>
+                )}
+              </div>
+            </div>
+
+            <div className="fin-health-card">
+              <div className="fin-health-icon fin-health-icon--expense">
+                <TrendingDown size={20} />
+              </div>
+              <div className="fin-health-body">
+                <span className="fin-health-label">Spending vs Last Month</span>
+                {lastMonthExpenses > 0 ? (
+                  <>
+                    <span className={`fin-health-value ${expenseChange <= 0 ? 'good' : 'bad'}`}>
+                      {expenseChange >= 0 ? '+' : ''}{expenseChange.toFixed(0)}%
+                    </span>
+                    <span className="fin-health-hint">
+                      {expenseChange <= 0
+                        ? `You spent ${formatCurrency(lastMonthExpenses - totalExpenses)} less`
+                        : `You spent ${formatCurrency(totalExpenses - lastMonthExpenses)} more`}
+                    </span>
+                  </>
+                ) : (
+                  <span className="fin-health-hint">Add last month's expenses to compare</span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Summary Cards */}
           <div className="summary-cards">
             <div className="summary-card income">
               <div className="card-icon">
-                <TrendingUp size={24} />
+                <ArrowUpRight size={24} />
               </div>
               <div className="card-content">
-                <span className="card-label">Income</span>
+                <span className="card-label">Money In</span>
                 <span className="card-value">{formatCurrency(totalIncome)}</span>
               </div>
-              <ArrowUpRight size={20} className="trend-icon positive" />
             </div>
-
             <div className="summary-card expenses">
               <div className="card-icon">
-                <TrendingDown size={24} />
+                <ArrowDownRight size={24} />
               </div>
               <div className="card-content">
-                <span className="card-label">Expenses</span>
+                <span className="card-label">Money Out</span>
                 <span className="card-value">{formatCurrency(totalExpenses)}</span>
               </div>
-              <ArrowDownRight size={20} className="trend-icon negative" />
             </div>
-
             <div className={`summary-card net ${netCashFlow >= 0 ? 'positive' : 'negative'}`}>
               <div className="card-icon">
                 <DollarSign size={24} />
               </div>
               <div className="card-content">
-                <span className="card-label">Net Cash Flow</span>
+                <span className="card-label">What's Left</span>
                 <span className="card-value">{formatCurrency(netCashFlow)}</span>
               </div>
-              {netCashFlow >= 0 ? <ArrowUpRight size={20} className="trend-icon positive" /> : <ArrowDownRight size={20} className="trend-icon negative" />}
             </div>
           </div>
 
-          {/* Monthly Trends Chart */}
+          {/* Upcoming Bills */}
+          {unpaidRecurring.length > 0 && (
+            <div className="fin-upcoming">
+              <h3><RefreshCw size={18} /> Upcoming Bills This Month</h3>
+              <p className="fin-upcoming-hint">
+                These recurring expenses haven't been recorded yet this month.
+              </p>
+              <div className="fin-upcoming-list">
+                {unpaidRecurring.map((item, idx) => (
+                  <div key={idx} className="fin-upcoming-item">
+                    <div className="fin-upcoming-info">
+                      <AlertTriangle size={16} className="fin-upcoming-warn" />
+                      <div>
+                        <span className="fin-upcoming-name">{item.description}</span>
+                        <span className="fin-upcoming-cat">{item.category}</span>
+                      </div>
+                    </div>
+                    <span className="fin-upcoming-amount">{formatCurrency(item.amount)}</span>
+                    <button
+                      className="fin-upcoming-add"
+                      onClick={() => {
+                        setTransactionForm({
+                          date: new Date().toISOString().split('T')[0],
+                          description: item.description,
+                          amount: item.amount.toString(),
+                          type: 'expense',
+                          category: item.category,
+                          recurring: true
+                        });
+                        setShowModal(true);
+                      }}
+                    >
+                      <Plus size={14} /> Record
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 6-Month Trend */}
           <div className="chart-card">
             <h3>6-Month Trend</h3>
             <div className="bar-chart">
@@ -281,14 +475,14 @@ const Finances: React.FC = () => {
               ))}
             </div>
             <div className="chart-legend">
-              <span className="legend-item"><span className="legend-color income" /> Income</span>
-              <span className="legend-item"><span className="legend-color expense" /> Expenses</span>
+              <span className="legend-item"><span className="legend-color income" /> Money In</span>
+              <span className="legend-item"><span className="legend-color expense" /> Money Out</span>
             </div>
           </div>
 
           {/* Expense Breakdown */}
           <div className="breakdown-card">
-            <h3>Expense Breakdown</h3>
+            <h3>Where Your Money Goes</h3>
             {Object.keys(expensesByCategory).length > 0 ? (
               <div className="breakdown-list">
                 {Object.entries(expensesByCategory)
@@ -311,14 +505,14 @@ const Finances: React.FC = () => {
               </div>
             ) : (
               <div className="empty-breakdown">
-                <p>No expenses recorded for this month</p>
+                <p>No expenses recorded for this month yet</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Transactions Tab */}
+      {/* ════ Transactions Tab ════ */}
       {activeTab === 'transactions' && (
         <div className="transactions-section">
           <div className="section-header">
@@ -333,23 +527,16 @@ const Finances: React.FC = () => {
                 />
               </div>
               <div className="filter-group">
-                <input
-                  type="month"
-                  value={filterMonth}
-                  onChange={(e) => setFilterMonth(e.target.value)}
-                />
-              </div>
-              <div className="filter-group">
                 <select value={filterType} onChange={(e) => setFilterType(e.target.value as any)}>
                   <option value="all">All Types</option>
-                  <option value="income">Income</option>
-                  <option value="expense">Expenses</option>
+                  <option value="income">Money In</option>
+                  <option value="expense">Money Out</option>
                 </select>
               </div>
             </div>
             <div className="action-buttons">
               <button className="btn-secondary" onClick={exportToCSV}>
-                <Download size={18} /> Export CSV
+                <Download size={18} /> Export
               </button>
               <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }}>
                 <Plus size={18} /> Add Transaction
@@ -362,7 +549,7 @@ const Finances: React.FC = () => {
               {filteredTransactions.map((transaction) => (
                 <div key={transaction.id} className={`transaction-item ${transaction.type}`}>
                   <div className="transaction-icon">
-                    {transaction.type === 'income' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                    {transaction.type === 'income' ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                   </div>
                   <div className="transaction-details">
                     <span className="transaction-description">{transaction.description}</span>
@@ -389,8 +576,8 @@ const Finances: React.FC = () => {
           ) : (
             <div className="empty-state">
               <DollarSign size={48} />
-              <h3>No transactions found</h3>
-              <p>Add your first transaction to start tracking</p>
+              <h3>No transactions yet</h3>
+              <p>Record your first transaction - it only takes a few seconds.</p>
               <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }}>
                 <Plus size={18} /> Add Transaction
               </button>
@@ -399,53 +586,178 @@ const Finances: React.FC = () => {
         </div>
       )}
 
-      {/* Budget Tab */}
+      {/* ════ Budget Tab ════ */}
       {activeTab === 'budget' && (
         <div className="budget-section">
-          <div className="section-header">
-            <h2>Monthly Budget</h2>
-            <div className="budget-summary">
-              <span>Total Budgeted: {formatCurrency(budgets.reduce((sum, b) => sum + b.budgeted, 0))}</span>
-              <span>Total Spent: {formatCurrency(totalExpenses)}</span>
+          {/* Category Picker */}
+          <div className="fin-budget-setup">
+            <h3><Wallet size={18} /> Set Up Your Budget</h3>
+            <p className="fin-budget-hint">
+              Pick the categories you spend money on. You can also create your own.
+            </p>
+
+            <div className="fin-cat-chips">
+              {PRESET_CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  className={`fin-cat-chip ${activeBudgetCategories.has(cat) ? 'fin-cat-chip--active' : ''}`}
+                  onClick={() => toggleBudgetCategory(cat)}
+                >
+                  {activeBudgetCategories.has(cat) && <CheckCircle size={14} />}
+                  {cat}
+                </button>
+              ))}
+
+              {/* Custom categories */}
+              {budgets.filter(b => b.isCustom).map(b => (
+                <button
+                  key={b.id}
+                  className="fin-cat-chip fin-cat-chip--active fin-cat-chip--custom"
+                  onClick={() => removeBudgetCategory(b.category)}
+                >
+                  <CheckCircle size={14} />
+                  {b.category}
+                  <X size={12} />
+                </button>
+              ))}
+
+              {/* Add custom */}
+              {showCategoryInput ? (
+                <div className="fin-cat-input">
+                  <input
+                    type="text"
+                    placeholder="Category name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addCustomCategory()}
+                    autoFocus
+                  />
+                  <button className="fin-cat-input-add" onClick={addCustomCategory}>
+                    <Plus size={14} />
+                  </button>
+                  <button className="fin-cat-input-cancel" onClick={() => { setShowCategoryInput(false); setNewCategoryName(''); }}>
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="fin-cat-chip fin-cat-chip--add"
+                  onClick={() => setShowCategoryInput(true)}
+                >
+                  <Plus size={14} /> Add Your Own
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="budget-grid">
-            {budgetsWithSpent.map((budget) => {
-              const percentage = budget.budgeted > 0 ? (budget.spent / budget.budgeted) * 100 : 0;
-              const isOverBudget = percentage > 100;
-
-              return (
-                <div key={budget.id} className={`budget-card ${isOverBudget ? 'over-budget' : ''}`}>
-                  <div className="budget-header">
-                    <h4>{budget.category}</h4>
-                    <span className={`budget-status ${isOverBudget ? 'over' : percentage > 75 ? 'warning' : 'good'}`}>
-                      {percentage.toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="budget-amounts">
-                    <span>Spent: {formatCurrency(budget.spent)}</span>
-                    <span>of {formatCurrency(budget.budgeted)}</span>
-                  </div>
-                  <div className="budget-bar">
-                    <div
-                      className={`budget-fill ${isOverBudget ? 'over' : percentage > 75 ? 'warning' : 'good'}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                  <div className="budget-input-group">
-                    <label>Budget Amount</label>
-                    <input
-                      type="number"
-                      value={budget.budgeted || ''}
-                      onChange={(e) => updateBudget(budget.category, parseFloat(e.target.value) || 0)}
-                      placeholder="Set budget"
-                    />
-                  </div>
+          {/* Budget Summary Bar */}
+          {budgets.length > 0 && (
+            <div className="fin-budget-summary">
+              <div className="fin-budget-summary-row">
+                <div className="fin-budget-summary-item">
+                  <span className="fin-budget-summary-label">Total Budget</span>
+                  <span className="fin-budget-summary-value">{formatCurrency(totalBudgeted)}</span>
                 </div>
-              );
-            })}
-          </div>
+                <div className="fin-budget-summary-item">
+                  <span className="fin-budget-summary-label">Total Spent</span>
+                  <span className="fin-budget-summary-value">{formatCurrency(totalExpenses)}</span>
+                </div>
+                <div className="fin-budget-summary-item">
+                  <span className="fin-budget-summary-label">Remaining</span>
+                  <span className={`fin-budget-summary-value ${totalBudgeted - totalExpenses >= 0 ? 'good' : 'bad'}`}>
+                    {formatCurrency(totalBudgeted - totalExpenses)}
+                  </span>
+                </div>
+              </div>
+              {totalBudgeted > 0 && (
+                <div className="fin-budget-summary-bar">
+                  <div
+                    className={`fin-budget-summary-fill ${totalExpenses / totalBudgeted > 1 ? 'over' : totalExpenses / totalBudgeted > 0.75 ? 'warning' : 'good'}`}
+                    style={{ width: `${Math.min((totalExpenses / totalBudgeted) * 100, 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Budget Cards */}
+          {budgetsWithSpent.length > 0 ? (
+            <div className="budget-grid">
+              {budgetsWithSpent.map((budget) => {
+                const percentage = budget.budgeted > 0 ? (budget.spent / budget.budgeted) * 100 : 0;
+                const isOverBudget = percentage > 100;
+                const remaining = budget.budgeted - budget.spent;
+
+                return (
+                  <div key={budget.id} className={`budget-card ${isOverBudget ? 'over-budget' : ''}`}>
+                    <div className="budget-header">
+                      <h4>{budget.category}</h4>
+                      <button
+                        className="fin-budget-remove"
+                        onClick={() => removeBudgetCategory(budget.category)}
+                        title="Remove from budget"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    <div className="budget-amounts">
+                      <span>Spent: {formatCurrency(budget.spent)}</span>
+                      {budget.budgeted > 0 && (
+                        <span className={remaining >= 0 ? 'good' : 'bad'}>
+                          {remaining >= 0 ? `${formatCurrency(remaining)} left` : `${formatCurrency(Math.abs(remaining))} over`}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="budget-bar">
+                      <div
+                        className={`budget-fill ${isOverBudget ? 'over' : percentage > 75 ? 'warning' : 'good'}`}
+                        style={{ width: `${Math.min(percentage, 100)}%` }}
+                      />
+                    </div>
+
+                    {budget.budgeted > 0 && (
+                      <div className="fin-budget-status">
+                        {isOverBudget ? (
+                          <span className="fin-budget-status-text bad">
+                            <AlertTriangle size={14} /> Over budget by {(percentage - 100).toFixed(0)}%
+                          </span>
+                        ) : percentage > 75 ? (
+                          <span className="fin-budget-status-text warning">
+                            <AlertTriangle size={14} /> Almost at your limit
+                          </span>
+                        ) : (
+                          <span className="fin-budget-status-text good">
+                            <CheckCircle size={14} /> On track
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="budget-input-group">
+                      <label>Monthly limit</label>
+                      <div className="fin-budget-input-wrap">
+                        <span className="fin-budget-input-prefix">$</span>
+                        <input
+                          type="number"
+                          value={budget.budgeted || ''}
+                          onChange={(e) => updateBudgetAmount(budget.category, parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <Wallet size={48} />
+              <h3>No budget categories selected</h3>
+              <p>Pick some categories above to start planning your monthly spending.</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -466,13 +778,13 @@ const Finances: React.FC = () => {
                   className={`type-btn ${transactionForm.type === 'income' ? 'active income' : ''}`}
                   onClick={() => setTransactionForm({ ...transactionForm, type: 'income', category: '' })}
                 >
-                  <TrendingUp size={18} /> Income
+                  <ArrowUpRight size={18} /> Money In
                 </button>
                 <button
                   className={`type-btn ${transactionForm.type === 'expense' ? 'active expense' : ''}`}
                   onClick={() => setTransactionForm({ ...transactionForm, type: 'expense', category: '' })}
                 >
-                  <TrendingDown size={18} /> Expense
+                  <ArrowDownRight size={18} /> Money Out
                 </button>
               </div>
 
@@ -486,17 +798,17 @@ const Finances: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>What was it for?</label>
                 <input
                   type="text"
                   value={transactionForm.description}
                   onChange={(e) => setTransactionForm({ ...transactionForm, description: e.target.value })}
-                  placeholder="What was this for?"
+                  placeholder="e.g. Monthly rent, Client payment..."
                 />
               </div>
 
               <div className="form-group">
-                <label>Amount</label>
+                <label>How much?</label>
                 <input
                   type="number"
                   value={transactionForm.amount}
@@ -511,8 +823,8 @@ const Finances: React.FC = () => {
                   value={transactionForm.category}
                   onChange={(e) => setTransactionForm({ ...transactionForm, category: e.target.value })}
                 >
-                  <option value="">Select category</option>
-                  {(transactionForm.type === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                  <option value="">Pick a category</option>
+                  {(transactionForm.type === 'income' ? incomeCategories : allExpenseCategories).map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
@@ -525,7 +837,7 @@ const Finances: React.FC = () => {
                     checked={transactionForm.recurring}
                     onChange={(e) => setTransactionForm({ ...transactionForm, recurring: e.target.checked })}
                   />
-                  Recurring transaction
+                  This happens every month
                 </label>
               </div>
 

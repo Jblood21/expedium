@@ -42,6 +42,7 @@ interface StoredUser {
   name: string;
   company?: string;
   createdAt: number;
+  suspended?: boolean;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -55,6 +56,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const session = secureStorage.getItem<Session>('expedium_session');
 
       if (storedUser && session && isSessionValid(session)) {
+        // Check if user has been suspended by admin
+        const allUsers = secureStorage.getItem<StoredUser[]>('expedium_users', []) || [];
+        const currentUser = allUsers.find((u: StoredUser) => u.id === storedUser.id);
+        if (currentUser?.suspended) {
+          // User was suspended, log them out
+          setUser(null);
+          secureStorage.removeItem('expedium_user');
+          secureStorage.removeItem('expedium_session');
+          document.body.classList.remove('dark-mode');
+          setIsLoading(false);
+          return;
+        }
+
         setUser(storedUser);
         // Update session activity
         secureStorage.setItem('expedium_session', updateSessionActivity(session));
@@ -95,6 +109,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!foundUser) {
       recordLoginAttempt(normalizedEmail, false);
       return { success: false, message: 'Invalid email or password' };
+    }
+
+    // Check if account is suspended
+    if (foundUser.suspended) {
+      return { success: false, message: 'Your account has been paused. Please contact support.' };
     }
 
     // Verify password - support both old (plain) and new (hashed) passwords

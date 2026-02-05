@@ -339,7 +339,6 @@ const BusinessPlan: React.FC = () => {
     const valueProposition = String(answers.value_proposition || '');
     const revenueModel = Array.isArray(answers.revenue_model) ? answers.revenue_model : [];
     const currentRevenue = String(answers.current_revenue || 'Pre-revenue');
-    const challenges = Array.isArray(answers.main_challenges) ? answers.main_challenges : [];
     const marketingChannels = Array.isArray(answers.marketing_channels) ? answers.marketing_channels : [];
     const goals = String(answers.goals_6month || '');
     const funding = Array.isArray(answers.funding) ? answers.funding : [];

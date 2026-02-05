@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  Megaphone, Mail, MessageSquare, Phone, Share2, Plus, Trash2, Edit2, Save, X,
-  Instagram, Twitter, Linkedin, Facebook, Send, Users, Sparkles, Copy, Check,
-  Settings, Link, Zap, Globe, ChevronRight, Upload, Download, Search, RefreshCw,
+  Megaphone, Mail, MessageSquare, Share2, Plus, Trash2, Edit2, Save, X,
+  Instagram, Twitter, Linkedin, Facebook, Send, Users, Sparkles, Copy,
+  Link, Zap, Globe, Upload, Search, RefreshCw,
   AlertCircle, CheckCircle, Clock, Bot, Wand2
 } from 'lucide-react';
 
@@ -162,8 +162,6 @@ Best regards,
       const valueProposition = answers.value_proposition || '';
       const targetMarket = answers.target_market || '';
       const revenueModel = Array.isArray(answers.revenue_model) ? answers.revenue_model : [];
-      const stage = answers.business_stage || '';
-
       // Extract what they sell/provide from value proposition or revenue model
       let whatWeOffer = '';
       if (valueProposition) {
@@ -217,7 +215,7 @@ I hope this message finds you well! My name is [Your Name], and I'm reaching out
 
 We work with ${customerType} in the ${industry} space, and ${whatWeOffer}.
 
-${valueProposition ? `Specifically, ${valueProposition.substring(0, 150)}${valueProposition.length > 150 ? '...' : ''}` : `We\'ve helped many ${customerType} achieve their goals and I believe we could do the same for you.`}
+${valueProposition ? `Specifically, ${valueProposition.substring(0, 150)}${valueProposition.length > 150 ? '...' : ''}` : `We've helped many ${customerType} achieve their goals and I believe we could do the same for you.`}
 
 Would you be open to a brief 15-minute call to explore if there's a fit? I'd love to learn more about what you're working on.
 
@@ -238,7 +236,7 @@ ${revenueModel.includes('Subscription Model') ? 'Get your first month free when 
   revenueModel.includes('Service Fees') || revenueModel.includes('Consulting') ? 'Book a free consultation session - no strings attached!' :
   'Take advantage of our limited-time introductory pricing!'}
 
-This offer is only available for a short time, so I didn\'t want you to miss out.
+This offer is only available for a short time, so I didn't want you to miss out.
 
 Interested? Just reply to this email and I'll send you the details.
 

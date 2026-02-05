@@ -38,26 +38,6 @@ export const sanitizeInput = (input: string): string => {
     .replace(/'/g, '&#039;');
 };
 
-// Sanitize object recursively
-export const sanitizeObject = <T extends Record<string, unknown>>(obj: T): T => {
-  const sanitized = {} as T;
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
-      (sanitized as Record<string, unknown>)[key] = sanitizeInput(value);
-    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      (sanitized as Record<string, unknown>)[key] = sanitizeObject(value as Record<string, unknown>);
-    } else if (Array.isArray(value)) {
-      (sanitized as Record<string, unknown>)[key] = value.map(item =>
-        typeof item === 'string' ? sanitizeInput(item) :
-        typeof item === 'object' && item !== null ? sanitizeObject(item as Record<string, unknown>) : item
-      );
-    } else {
-      (sanitized as Record<string, unknown>)[key] = value;
-    }
-  }
-  return sanitized;
-};
-
 // Rate limiter for login attempts
 interface RateLimitEntry {
   attempts: number;

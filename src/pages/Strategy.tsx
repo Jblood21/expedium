@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  Target, Grid, Users, TrendingUp, Plus, Trash2, Edit2, Save, X,
+  Target, Grid, Users, Plus, Trash2, Edit2, Save, X,
   CheckCircle, Circle, Flag, Calendar, AlertTriangle, Shield, Lightbulb,
-  ArrowRight, Zap
+  Zap
 } from 'lucide-react';
 
 interface SWOTItem {

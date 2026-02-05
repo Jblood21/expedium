@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  Users, Plus, Edit2, Trash2, Save, X, Search, DollarSign,
-  Star, Mail, Phone, Calendar, Briefcase, TrendingUp, TrendingDown,
-  Award, Clock, Filter, UserPlus, BarChart3
+  Users, Edit2, Trash2, Save, X, Search, DollarSign,
+  Star, Mail, Phone, Calendar,
+  Award, UserPlus, BarChart3
 } from 'lucide-react';
 import { generateSecureId } from '../utils/security';
 

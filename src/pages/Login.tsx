@@ -5,7 +5,7 @@ import { validatePasswordStrength, validateEmail } from '../utils/security';
 import {
   Zap, Mail, Lock, User, Building, ArrowRight, CheckCircle,
   BarChart3, Users, Calculator, FileText, Target, TrendingUp,
-  Shield, Clock, AlertCircle
+  Shield, Clock
 } from 'lucide-react';
 
 const Login: React.FC = () => {

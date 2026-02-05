@@ -3,7 +3,7 @@ import {
   BookOpen, Play, FileText, Download, ExternalLink, Search,
   TrendingUp, Users, DollarSign, Target, Lightbulb, CheckCircle,
   ChevronRight, Star, Clock, Filter, Award, Building2, Sparkles,
-  RefreshCw, Plus, Minus, ArrowUpRight, ArrowDownRight, Equal,
+  RefreshCw, Plus, ArrowUpRight, ArrowDownRight, Equal,
   Loader, Trash2, Globe
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -259,17 +259,6 @@ const Resources: React.FC = () => {
       comparison: { pricing, marketShare, features },
       threatLevel
     };
-  };
-
-  // Check if matches exist for this business
-  const checkForMatches = (): boolean => {
-    const { category, matchScore } = analyzeBusinessType();
-    if (!category || matchScore < 1) {
-      return false;
-    }
-    const usedNames = competitors.map(c => c.name);
-    const availableCompetitors = category.competitors.filter(c => !usedNames.includes(c.name));
-    return availableCompetitors.length > 0;
   };
 
   const handleGenerateCompetitors = async (count: number) => {

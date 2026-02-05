@@ -4,7 +4,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, Plus, Trash2, Edit2, Save, X,
   Calendar, Tag, PieChart, BarChart3, ArrowUpRight, ArrowDownRight,
   Download, Search, Wallet, AlertTriangle, CheckCircle, RefreshCw,
-  Percent, ArrowRight, Heart
+  Heart
 } from 'lucide-react';
 
 interface Transaction {

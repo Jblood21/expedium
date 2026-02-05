@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  FileText, Download, Plus, Trash2, Edit2, Save, X, Send,
-  DollarSign, Calendar, User, Building, FileCheck, Copy, Printer
+  FileText, Plus, Trash2, Edit2, Save, X,
+  DollarSign, Calendar, User, FileCheck, Copy, Printer
 } from 'lucide-react';
 
 interface Invoice {
